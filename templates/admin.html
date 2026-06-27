@@ -1,0 +1,1935 @@
+<!DOCTYPE html>
+<html lang="en" x-data="app()" x-init="init()" class="antialiased">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title x-text="pageTitle"></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@floating-ui/core@1.6.9/dist/floating-ui.core.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.6.13/dist/floating-ui.dom.umd.min.js"></script>
+  <script defer src="/static/js/material-tailwind-html-v2.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --sky: #0284C7;
+      --sky-hover: #0369A1;
+      --sky-light: #E0F2FE;
+      --sky-dark: #0C1B33;
+      --success: #16A34A;
+      --warning: #D97706;
+      --danger: #DC2626;
+      --info: #0284C7;
+    }
+    * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; scrollbar-width: thin; scrollbar-color: #CBD5E1 transparent; }
+    .font-mono { font-family: 'JetBrains Mono', monospace !important; }
+    .sky { color: var(--sky); }
+    .sky-bg { background: var(--sky); }
+    .sky-border { border-color: var(--sky); }
+    .material-card { background: #fff; border-radius: 0.75rem; border: 1px solid rgb(229 231 235); box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); padding: 1.5rem; transition: all 0.3s; }
+    .material-card:hover { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
+    .stat-card { background: #fff; border-radius: 0.75rem; border: 1px solid rgb(229 231 235); box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); padding: 1.5rem; position: relative; overflow: hidden; }
+    .stat-card:hover { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
+    .stat-badge { width: 3rem; height: 3rem; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; color: #fff; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); }
+    .stat-badge-grad { width: 3rem; height: 3rem; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; color: #fff; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); background-image: linear-gradient(to bottom right, var(--tw-gradient-stops)); }
+    .input { width: 100%; padding: 0.625rem 0.875rem; border-radius: 0.5rem; border: 1px solid rgb(229 231 235); background: #fff; font-size: 0.875rem; line-height: 1.25rem; color: rgb(30 58 138); transition: all 0.3s; }
+    .input:focus { outline: 2px solid transparent; outline-offset: 2px; border-color: var(--sky); box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2); }
+    .input::placeholder { color: rgb(148 163 184); }
+    .input-error { border-color: rgb(248 113 113); }
+    .label { display: block; font-size: 0.875rem; line-height: 1.25rem; font-weight: 500; color: rgb(30 64 175); margin-bottom: 0.375rem; }
+    .select-input { width: 100%; padding: 0.625rem 0.875rem; border-radius: 0.5rem; border: 1px solid rgb(229 231 235); background: #fff; font-size: 0.875rem; line-height: 1.25rem; color: rgb(30 58 138); transition: all 0.3s; -webkit-appearance: none; appearance: none; background-repeat: no-repeat; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-position: right 12px center; }
+    .select-input:focus { outline: 2px solid transparent; outline-offset: 2px; border-color: var(--sky); box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2); }
+    .select-input::placeholder { color: rgb(148 163 184); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.625rem 1rem; border-radius: 0.5rem; font-size: 0.875rem; line-height: 1.25rem; font-weight: 500; transition: all 0.3s; cursor: pointer; border: 0; user-select: none; }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.625rem 0.875rem; border-radius: 0.5rem; font-size: 0.875rem; line-height: 1.25rem; font-weight: 500; transition: all 0.3s; cursor: pointer; border: 0; user-select: none; color: #fff; background: var(--sky); }
+    .btn-primary:hover { background: var(--sky-hover); box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35); }
+    .btn-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.625rem 1rem; border-radius: 0.5rem; font-size: 0.875rem; line-height: 1.25rem; font-weight: 500; transition: all 0.3s; cursor: pointer; border: 0; user-select: none; color: #64748b; }
+    .btn-ghost:hover { background-color: #f0f9ff; }
+    .btn-danger { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.625rem 1rem; border-radius: 0.5rem; font-size: 0.875rem; line-height: 1.25rem; font-weight: 500; transition: all 0.3s; cursor: pointer; border: 0; user-select: none; background-color: #dc2626; color: #fff; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); }
+    .btn-danger:hover { background-color: #b91c1c; }
+    .btn-sm { padding: 0.375rem 0.75rem; font-size: 0.75rem; line-height: 1rem; }
+    .btn-xs { padding: 0.25rem 0.5rem; font-size: 0.75rem; line-height: 1rem; }
+    .btn-loading { pointer-events: none; opacity: 0.7; }
+    .badge { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; line-height: 1rem; font-weight: 500; }
+    .badge-success { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; line-height: 1rem; font-weight: 500; background-color: #ecfdf5; color: #047857; }
+    .badge-warning { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; line-height: 1rem; font-weight: 500; background-color: #fffbeb; color: #b45309; }
+    .badge-danger { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; line-height: 1rem; font-weight: 500; background-color: #fef2f2; color: #b91c1c; }
+    .badge-info { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; line-height: 1rem; font-weight: 500; background-color: #eff6ff; color: #1d4ed8; }
+    .badge-neutral { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; line-height: 1rem; font-weight: 500; background-color: #f0f9ff; color: #64748b; }
+    .table-wrap { overflow-x: auto; margin: 0 -1.5rem; padding: 0 1.5rem; }
+    table { width: 100%; font-size: 0.875rem; line-height: 1.25rem; }
+    thead { background-color: #f0f9ff; border-bottom: 1px solid rgb(229 231 235); }
+    th { text-align: left; padding: 0.875rem 1rem; font-weight: 600; color: #64748b; font-size: 0.75rem; line-height: 1rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    td { padding: 0.875rem 1rem; border-bottom: 1px solid rgb(243 244 246); color: rgb(30 58 138); }
+    tbody tr { transition: color, background-color, border-color, text-decoration-color, fill, stroke 0.1s; }
+    tbody tr:hover { background-color: #f0f9ff; }
+    .sidebar-link { display: flex; align-items: center; gap: 0.75rem; padding: 0.625rem 1rem; border-radius: 0.5rem; font-size: 0.875rem; line-height: 1.25rem; font-weight: 500; color: rgb(148 163 184); transition: all 0.3s; position: relative; }
+    .sidebar-link:hover { color: #172554; background-color: #f0f9ff; }
+    .sidebar-link.active { color: #172554; background-color: #f0f9ff; font-weight: 600; }
+    .sidebar-link.active::before { content: ''; position: absolute; left: -16px; top: 50%; transform: translateY(-50%); width: 3px; height: 20px; border-radius: 0 3px 3px 0; background: var(--sky); }
+    .sidebar-link .nav-icon { width: 1.25rem; height: 1.25rem; flex-shrink: 0; }
+    .sidebar-link.active .nav-icon { color: #172554; }
+    .page { display: none; }
+    .page.active { display: block; }
+    .toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 50; display: flex; flex-direction: column; gap: 0.75rem; pointer-events: none; }
+    .toast { pointer-events: auto; display: flex; align-items: flex-start; gap: 0.75rem; padding: 1rem 1.25rem; border-radius: 0.75rem; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); border: 1px solid; backdrop-filter: blur(4px); font-size: 0.875rem; line-height: 1.25rem; font-weight: 500; max-width: 24rem; transition: all 0.3s; }
+    .toast-enter { animation: slideIn 0.3s cubic-bezier(.16,1,.3,1); }
+    .toast-exit { animation: slideOut 0.3s cubic-bezier(.16,1,.3,1) forwards; }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn 0.3s cubic-bezier(.16,1,.3,1); }
+    .modal-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 40; display: flex; align-items: center; justify-content: center; }
+    .modal-card { background: #fff; border-radius: 1rem; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); padding: 1.5rem; max-width: 28rem; width: 100%; margin: 0 auto; }
+    .modal-wide { max-width: 56rem; }
+    .skeleton { background-color: #e0f2fe; border-radius: 0.5rem; animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+    @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .dot-pulse { animation: pulse-dot 1.5s ease-in-out infinite; }
+    .pipeline-stage { flex: 1 1 0%; position: relative; padding: 1rem 0.75rem; border-radius: 0.5rem; border: 1px solid rgb(229 231 235); background: #fff; }
+    .pipeline-arrow { display: flex; align-items: center; color: rgb(203 213 225); }
+    .pipeline-connector { height: 1px; flex: 1 1 0%; background-color: rgb(229 231 235); margin: 0 0.5rem; }
+    [x-cloak] { display: none !important; }
+    @media (max-width: 1023px) { .sidebar-mobile { position: fixed; inset: 0; z-index: 30; } }
+    .cmd-k-modal { position: fixed; inset: 0; z-index: 50; display: flex; align-items: flex-start; justify-content: center; padding-top: 15vh; }
+    .cmd-k-input { width: 100%; background: transparent; border: none; outline: 2px solid transparent; outline-offset: 2px; font-size: 1rem; line-height: 1.5rem; color: #172554; }
+    .cmd-k-input::placeholder { color: rgb(148 163 184); }
+    .intel-item { display: flex; align-items: flex-start; gap: 1rem; padding: 0.875rem 1rem; border-radius: 0.5rem; transition: color, background-color, border-color, text-decoration-color, fill, stroke 0.3s; cursor: pointer; }
+    .intel-item:hover { background-color: #f0f9ff; }
+
+    .nav-breadcrumb { display: flex; align-items: center; gap: 0.375rem; font-size: 0.75rem; line-height: 1rem; color: rgb(148 163 184); }
+    .nav-breadcrumb a:hover { color: rgb(30 64 175); transition: color 0.3s; }
+    .gradient-primary { background: linear-gradient(135deg, #17275C 0%, #0C1B33 100%); }
+    .apexcharts-tooltip { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important; }
+    .team-card { background: #fff; border-radius: 0.75rem; border: 1px solid rgb(229 231 235); box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); padding: 1.25rem; text-align: center; transition: all 0.3s; }
+    .team-card:hover { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
+    .team-avatar { width: 4rem; height: 4rem; border-radius: 9999px; margin: 0 auto 0.75rem; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 1.25rem; line-height: 1.75rem; }
+    .org-logo { width: 2rem; height: 2rem; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 0.75rem; line-height: 1rem; flex-shrink: 0; }
+    .user-dropdown { position: absolute; right: 0; top: 100%; margin-top: 0.5rem; width: 14rem; background: #fff; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); border: 1px solid rgb(229 231 235); padding: 0.5rem 0; z-index: 50; }
+    .user-dropdown-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.625rem 1rem; font-size: 0.875rem; line-height: 1.25rem; color: rgb(30 64 175); transition: color, background-color, border-color, text-decoration-color, fill, stroke 0.3s; cursor: pointer; }
+    .user-dropdown-item:hover { background-color: #f0f9ff; }
+    .pagination-btn { width: 2.25rem; height: 2.25rem; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; line-height: 1.25rem; font-weight: 500; color: #64748b; transition: all 0.3s; }
+    .pagination-btn:hover { background-color: #f0f9ff; color: #172554; }
+    .pagination-btn.active { color: #fff; background: var(--sky); }
+    .pagination-btn.active:hover { background: var(--sky-hover); }
+    .checkbox { width: 1rem; height: 1rem; border-radius: 0.25rem; border-color: rgb(203 213 225); color: var(--sky); cursor: pointer; }
+    .checkbox:focus { box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.3); }
+    .notification-dot { position: absolute; top: -0.25rem; right: -0.25rem; width: 1rem; height: 1rem; border-radius: 9999px; background-color: #ef4444; color: #fff; font-size: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+  </style>
+</head>
+<body class="bg-blue-50 text-blue-950" @keydown.window="handleKeydown">
+
+<!-- LOGIN -->
+<div x-show="!authenticated" class="min-h-screen flex items-center justify-center" style="background:#EFF6FF" x-cloak>
+  <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-8 w-full max-w-md mx-4 fade-in">
+    <div class="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-6 sky-bg" data-ripple-light="true">
+      <span class="text-2xl font-bold text-white">N</span>
+    </div>
+    <h1 class="text-2xl font-bold text-blue-950 tracking-tight text-center mb-1">NextBid</h1>
+    <p class="text-sm text-slate-500 text-center mb-8">Executive Intelligence Operating System</p>
+    <div x-show="authError" class="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-xs text-left" x-text="authError"></div>
+    <div x-show="authMessage" class="mb-4 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-600 text-xs text-left" x-text="authMessage"></div>
+    <div class="space-y-4">
+      <div class="text-left">
+        <label class="text-xs font-medium text-slate-500 mb-1.5 block">Username or Email</label>
+        <input type="text" x-model="loginUsername" @keydown.enter="login()" class="input" placeholder="you@company.com" autocomplete="username">
+      </div>
+      <div class="text-left">
+        <label class="text-xs font-medium text-slate-500 mb-1.5 block">Password</label>
+        <div class="relative">
+          <input :type="loginShowPassword ? 'text' : 'password'" x-model="loginPassword" @keydown.enter="login()" class="input pr-10" placeholder="Enter password" autocomplete="current-password" minlength="6">
+          <button type="button" @click="loginShowPassword = !loginShowPassword" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors p-1.5" tabindex="-1">
+            <svg x-show="!loginShowPassword" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            <svg x-show="loginShowPassword" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
+          </button>
+        </div>
+      </div>
+      <button @click="login()" class="btn-primary w-full" :disabled="!loginUsername || !loginPassword || loginLoading" data-ripple-dark="true">
+        <span x-show="!loginLoading">Sign In</span>
+        <span x-show="loginLoading" class="inline-flex items-center gap-2"><svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>Signing in...</span>
+      </button>
+      <div class="text-center pt-1">
+        <button @click="showForgotPassword = true; forgotEmail = ''; forgotMessage = ''; forgotError = ''" class="text-xs text-slate-500 hover:text-blue-600 transition-colors">Forgot password?</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FORGOT PASSWORD MODAL -->
+<div x-show="showForgotPassword" class="modal-overlay" x-cloak @click.self="showForgotPassword = false">
+  <div class="modal-card max-w-sm text-center fade-in">
+    <h3 class="text-lg font-semibold text-blue-950 mb-2">Reset Password</h3>
+    <p class="text-sm text-slate-500 mb-6">Enter your email to receive a reset link.</p>
+    <div x-show="forgotError" class="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-xs text-left" x-text="forgotError"></div>
+    <div x-show="forgotMessage" class="mb-4 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-600 text-xs text-left" x-text="forgotMessage"></div>
+    <div class="space-y-4">
+      <div class="text-left" x-show="!forgotSent">
+        <label class="text-xs font-medium text-slate-500 mb-1.5 block">Email Address</label>
+        <input type="email" x-model="forgotEmail" @keydown.enter="forgotPassword()" class="input" placeholder="you@company.com">
+      </div>
+      <div x-show="forgotResetLink" class="text-left mb-4">
+        <label class="text-xs font-medium text-slate-500 mb-1.5 block">Reset Link (dev mode)</label>
+        <input type="text" class="input text-xs font-mono" :value="forgotResetLink" readonly @click="$el.select()">
+      </div>
+      <div class="flex gap-3 justify-center">
+        <button x-show="!forgotSent" @click="forgotPassword()" class="btn-primary flex-1" :disabled="!forgotEmail || forgotLoading" data-ripple-light="true">
+          <span x-show="!forgotLoading">Send Reset Link</span>
+          <span x-show="forgotLoading">Sending...</span>
+        </button>
+        <button @click="showForgotPassword = false; forgotSent = false; forgotResetLink = ''" class="btn-ghost border border-gray-200">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESET PASSWORD MODAL -->
+<div x-show="showResetPassword" class="modal-overlay" x-cloak @click.self="showResetPassword = false">
+  <div class="modal-card max-w-sm text-center fade-in">
+    <h3 class="text-lg font-semibold text-blue-950 mb-2">Set New Password</h3>
+    <p class="text-sm text-slate-500 mb-6">Choose a new password for your account.</p>
+    <div x-show="resetError" class="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-xs text-left" x-text="resetError"></div>
+    <div x-show="resetMessage" class="mb-4 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-600 text-xs text-left" x-text="resetMessage"></div>
+    <div class="space-y-4">
+      <div class="text-left">
+        <label class="text-xs font-medium text-slate-500 mb-1.5 block">New Password</label>
+        <input type="password" x-model="resetPassword" @keydown.enter="submitResetPassword()" class="input" placeholder="Minimum 6 characters" minlength="6">
+      </div>
+      <div class="text-left">
+        <label class="text-xs font-medium text-slate-500 mb-1.5 block">Confirm Password</label>
+        <input type="password" x-model="resetConfirm" @keydown.enter="submitResetPassword()" class="input" placeholder="Re-enter password" minlength="6">
+      </div>
+      <div class="flex gap-3 justify-center">
+        <button @click="submitResetPassword()" class="btn-primary flex-1" :disabled="!resetPassword || !resetConfirm || resetPassword !== resetConfirm || resetPassword.length < 6 || resetLoading" data-ripple-light="true">
+          <span x-show="!resetLoading">Reset Password</span>
+          <span x-show="resetLoading">Resetting...</span>
+        </button>
+        <button @click="showResetPassword = false" class="btn-ghost border border-gray-200">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div x-show="authenticated" class="flex h-screen overflow-hidden" x-cloak>
+  <div x-show="sidebarOpen" @click="sidebarOpen = false" class="fixed inset-0 bg-black/40 z-20 lg:hidden" x-cloak></div>
+
+  <!-- Sidebar -->
+    <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="fixed lg:static inset-y-0 left-0 z-30 w-72 flex flex-col shrink-0 transition-transform duration-300 lg:translate-x-0 bg-white border-r border-gray-200/80 lg:m-4 lg:rounded-xl lg:h-[calc(100vh-32px)] lg:shadow-[0_1px_3px_0_rgba(0,0,0,0.04)]">
+    <div class="px-4 py-5">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm sky-bg" data-ripple-light="true">N</div>
+        <div>
+          <h1 class="text-base font-bold tracking-tight text-blue-950">NextBid</h1>
+          <p class="text-[10px] text-slate-500 font-medium tracking-widest uppercase">Executive Intelligence OS</p>
+        </div>
+      </div>
+    </div>
+    <!-- User Profile -->
+    <div class="px-4 pb-4 border-b border-gray-100">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-slate-600 to-slate-800 flex items-center justify-center text-white font-bold text-sm shrink-0" x-text="(userData?.name || userData?.username || 'U').charAt(0).toUpperCase()"></div>
+        <div class="min-w-0">
+          <p class="text-sm font-semibold text-blue-900 truncate" x-text="(userData?.name || userData?.username || 'User')"></p>
+          <p class="text-[10px] text-slate-400 truncate" x-text="(userData?.email || '')"></p>
+        </div>
+      </div>
+    </div>
+    <nav class="flex-1 px-4 space-y-0.5 overflow-y-auto pt-3">
+      <template x-for="item in navItems" :key="item.id">
+        <a :href="'/' + item.id" @click.prevent="navigate(item.id)" class="sidebar-link" :class="{ 'active': page === item.id }" data-ripple-light="true">
+          <span x-html="item.icon" class="nav-icon"></span>
+          <span x-text="item.label"></span>
+        </a>
+      </template>
+    </nav>
+    <div class="px-4 py-4 border-t border-gray-100">
+      <template x-if="lastRun">
+        <div>
+          <div class="flex items-center gap-2 mb-1.5">
+            <span :class="lastRun.status === 'running' ? 'dot-pulse' : ''" class="w-2 h-2 rounded-full" :style="'background:' + (lastRun.status === 'running' ? 'var(--info)' : lastRun.status === 'completed' ? 'var(--success)' : 'var(--danger)')"></span>
+            <span class="text-xs text-slate-500" x-text="lastRun.status === 'running' ? 'Scanning...' : 'Last Scan'"></span>
+          </div>
+          <p class="text-xs text-slate-400 font-mono truncate" x-text="lastRun.batch_id"></p>
+          <p class="text-xs text-slate-400 mt-0.5" x-text="timeAgo(lastRun.started_at)"></p>
+        </div>
+      </template>
+      <template x-if="!lastRun">
+        <p class="text-xs text-slate-400">No intelligence collected yet</p>
+      </template>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="flex-1 flex flex-col min-w-0 lg:pr-4 lg:pt-4">
+    <!-- Top Bar -->
+    <header class="bg-white px-4 lg:px-6 py-3 flex items-center justify-between shrink-0 gap-4 lg:rounded-xl lg:border lg:border-gray-200/80 lg:shadow-[0_1px_3px_0_rgba(0,0,0,0.04)] lg:mx-0">
+      <div class="flex items-center gap-3">
+        <div class="relative lg:hidden -ml-1.5">
+          <button @click="sidebarOpen = !sidebarOpen" class="btn-ghost btn-sm p-1.5" data-tooltip-target="hamburger-tip" data-ripple-light="true">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+          <div data-tooltip="hamburger-tip" class="absolute top-full mt-1 left-1/2 -translate-x-1/2 whitespace-nowrap pointer-events-none opacity-0 transition-opacity duration-300 text-xs bg-slate-900 text-white px-2 py-1 rounded">Toggle sidebar</div>
+        </div>
+        <div>
+          <div class="nav-breadcrumb">
+            <a href="#" @click.prevent="navigate('dashboard')">Dashboard</a>
+            <svg x-show="page !== 'dashboard'" class="w-3 h-3 shrink-0 self-center" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            <span x-show="page !== 'dashboard'" x-text="pageTitle.replace('NextBid — ', '')" class="text-blue-800 font-medium"></span>
+          </div>
+          <h2 class="text-base font-semibold text-blue-950 mt-1 leading-snug" x-text="pageSubtitle"></h2>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="relative hidden sm:block">
+          <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input type="text" x-model="globalSearch" placeholder="Search..." class="input pl-9 w-48 lg:w-56 text-xs" @keydown.escape="globalSearch = ''" @focus="cmdPaletteOpen = true">
+        </div>
+        <!-- Notification Bell -->
+        <div class="relative">
+          <button data-popover-target="notif-panel" class="btn-ghost btn-sm p-1.5 relative" data-ripple-light="true">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+            <span class="notification-dot">3</span>
+          </button>
+          <div data-popover="notif-panel" data-popover-placement="bottom-end" class="user-dropdown right-0 w-72 pointer-events-none opacity-0 transition-opacity duration-300">
+            <div class="px-4 py-2 border-b border-gray-100"><span class="text-sm font-semibold text-blue-900">Notifications</span></div>
+            <div class="max-h-60 overflow-y-auto">
+              <div class="user-dropdown-item text-xs"><span class="w-2 h-2 rounded-full sky-bg shrink-0"></span><span>Scan completed &mdash; 12 new opportunities</span></div>
+              <div class="user-dropdown-item text-xs"><span class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span><span>AI assessment ready for batch NB-2406</span></div>
+              <div class="user-dropdown-item text-xs"><span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span><span>Weekly intelligence report sent</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="relative hidden sm:inline-flex">
+          <button @click="cmdPaletteOpen = true" class="btn-ghost btn-sm p-1.5" title="Command Palette (⌘K)" data-tooltip-target="cmd-tip" data-ripple-light="true">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+          </button>
+          <div data-tooltip="cmd-tip" class="absolute top-full mt-1 left-1/2 -translate-x-1/2 whitespace-nowrap pointer-events-none opacity-0 transition-opacity duration-300 text-xs bg-slate-900 text-white px-2 py-1 rounded">Command palette</div>
+        </div>
+        <!-- User Menu -->
+        <div class="relative">
+          <button data-popover-target="user-menu" class="flex items-center gap-2 btn-ghost btn-sm px-2 py-1.5" data-ripple-light="true">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-slate-600 to-slate-800 flex items-center justify-center text-white font-bold text-xs" x-text="(userData?.name || userData?.username || 'U').charAt(0).toUpperCase()"></div>
+            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          <div data-popover="user-menu" data-popover-placement="bottom-end" class="user-dropdown pointer-events-none opacity-0 transition-opacity duration-300">
+            <div class="px-4 py-2 border-b border-gray-100"><p class="text-sm font-semibold text-blue-900" x-text="(userData?.name || userData?.username || 'User')"></p><p class="text-xs text-slate-400" x-text="(userData?.email || '')"></p></div>
+            <div class="py-1">
+              <div class="user-dropdown-item" @click="navigate('settings')"><svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Settings</div>
+              <div class="border-t border-gray-100 my-1"></div>
+              <div class="user-dropdown-item text-red-500" @click="logout()"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>Sign Out</div>
+            </div>
+          </div>
+        </div>
+        <button @click="triggerScrape" :disabled="scrapeRunning" :class="scrapeRunning ? 'btn-loading' : ''" class="btn-primary text-sm" data-ripple-light="true">
+          <svg x-show="!scrapeRunning" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          <svg x-show="scrapeRunning" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+          <span x-text="scrapeRunning ? 'Scanning...' : 'Scan Now'"></span>
+        </button>
+        <template x-if="scrapeRunning && scrapeProgress">
+          <div class="flex items-center gap-2 ml-3 min-w-0">
+            <div class="w-28 h-1.5 bg-slate-200 rounded-full overflow-hidden shrink-0">
+              <div class="h-full bg-sky-500 rounded-full transition-all duration-500" :style="'width:' + (scrapeProgress.total_sources > 0 ? Math.round(scrapeProgress.completed_sources / scrapeProgress.total_sources * 100) : 0) + '%'"></div>
+            </div>
+            <span class="text-[11px] text-slate-500 truncate" x-text="scrapeProgress.current_source ? (scrapeProgress.completed_sources + '/' + scrapeProgress.total_sources + ' \u00b7 ' + scrapeProgress.current_message) : scrapeProgress.current_message"></span>
+          </div>
+        </template>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="flex-1 overflow-y-auto p-4 lg:p-6 space-y-6">
+      <div x-show="loading.page" class="space-y-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <template x-for="i in 4">
+            <div class="material-card p-6"><div class="skeleton h-10 w-20 mb-2"></div><div class="skeleton h-4 w-32"></div></div>
+          </template>
+        </div>
+        <div class="material-card p-6"><div class="skeleton h-4 w-40 mb-4"></div><div class="skeleton h-48 w-full"></div></div>
+      </div>
+
+      <!-- DASHBOARD -->
+      <div id="page-dashboard" class="page fade-in" x-show="!loading.page" :class="{ 'active': page === 'dashboard' }" x-cloak>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div class="stat-card cursor-pointer" @click="navigate('opportunities')" data-ripple-light="true">
+            <div class="flex items-center gap-4">
+              <div class="stat-badge-grad" style="background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              </div>
+              <div>
+                <p class="text-xs text-slate-500 font-medium tracking-wider uppercase">Opportunity Pipeline</p>
+                <p class="text-3xl font-bold sky" x-text="stats.total_notices ?? '—'"></p>
+              </div>
+            </div>
+          </div>
+          <div class="stat-card" data-ripple-light="true">
+            <div class="flex items-center gap-4">
+              <div class="stat-badge-grad from-slate-600 to-slate-500">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+              </div>
+              <div>
+                <p class="text-xs text-slate-500 font-medium tracking-wider uppercase">AI Assessments</p>
+                <p class="text-3xl font-bold text-blue-950" x-text="stats.total_analyzed ?? '—'"></p>
+              </div>
+            </div>
+          </div>
+          <div class="stat-card cursor-pointer" @click="navigate('settings')" data-ripple-light="true">
+            <div class="flex items-center gap-4">
+              <div class="stat-badge-grad from-slate-600 to-slate-500">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+              </div>
+              <div>
+                <p class="text-xs text-slate-500 font-medium tracking-wider uppercase">Intelligence Recipients</p>
+                <p class="text-3xl font-bold text-blue-950" x-text="stats.total_recipients ?? '—'"></p>
+              </div>
+            </div>
+          </div>
+          <div class="stat-card" data-ripple-light="true">
+            <div class="flex items-center gap-4">
+              <div class="stat-badge-grad from-slate-600 to-slate-500">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              </div>
+              <div>
+                <p class="text-xs text-slate-500 font-medium tracking-wider uppercase">Last Intelligence Scan</p>
+                <p class="text-3xl font-bold text-blue-950" x-text="lastRun ? (lastRun.notices_new ?? 0) + ' new' : '—'"></p>
+                <div class="flex items-center gap-1.5 mt-1">
+                  <span :class="lastRun?.status === 'running' ? 'dot-pulse' : ''" class="w-1.5 h-1.5 rounded-full inline-block" :style="'background:' + (lastRun?.status === 'running' ? 'var(--info)' : lastRun?.status === 'completed' ? 'var(--success)' : 'var(--danger)')"></span>
+                  <span class="text-xs text-slate-400" x-text="lastRun ? timeAgo(lastRun.started_at) : 'Never'"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div class="material-card">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-base font-semibold text-blue-950">Source Intelligence</h3>
+              <span class="text-xs text-slate-400" x-text="(stats.source_counts ?? []).length + ' sources'"></span>
+            </div>
+            <div id="sourceBarChart" class="apexcharts-wrapper"></div>
+          </div>
+          <div class="material-card">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-base font-semibold text-blue-950">Opportunity Pipeline</h3>
+              <span class="text-xs text-slate-400" x-text="'Conversion: ' + (stats.total_notices > 0 ? Math.round((stats.total_analyzed || 0) / stats.total_notices * 100) + '%' : '—')"></span>
+            </div>
+            <div id="pipelineChart" class="apexcharts-wrapper"></div>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div class="material-card">
+            <div class="flex items-center justify-between mb-5">
+              <h3 class="text-base font-semibold text-blue-950">Intelligence Feed</h3>
+              <span class="flex items-center gap-1.5 text-xs text-slate-400"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Live</span>
+            </div>
+            <template x-if="runs.length">
+              <div class="space-y-1">
+                <template x-for="(run, i) in runs.slice(0, 10)" :key="run.id">
+                  <div class="intel-item" @click="loadRunDetail(run.batch_id)" data-ripple-light="true">
+                    <div class="w-2 h-2 rounded-full mt-1.5 shrink-0" :style="'background:' + (run.status === 'completed' ? 'var(--success)' : run.status === 'running' ? 'var(--info)' : 'var(--danger)')"></div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2">
+                        <span class="text-sm font-medium truncate" x-text="'Scan ' + run.batch_id"></span>
+                        <span class="badge-neutral text-[10px]" x-text="run.status"></span>
+                      </div>
+                      <p class="text-xs text-slate-400 mt-0.5" x-text="run.notices_found + ' opportunities detected, ' + run.notices_new + ' new'"></p>
+                      <p class="text-xs text-slate-500 mt-0.5" x-text="timeAgo(run.started_at)"></p>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </template>
+            <template x-if="!runs.length">
+              <div class="text-center py-10">
+                <svg class="w-10 h-10 mx-auto text-slate-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                <p class="text-sm text-slate-400">Intelligence feed will populate after first scan.</p>
+              </div>
+            </template>
+          </div>
+          <div class="material-card">
+            <div class="flex items-center justify-between mb-5">
+              <h3 class="text-base font-semibold text-blue-950">Strategic Recommendations</h3>
+              <span class="text-xs text-slate-400">AI-powered</span>
+            </div>
+            <template x-if="runs.length">
+              <div class="space-y-3">
+                <div class="p-4 rounded-lg border border-gray-200 bg-blue-50 relative overflow-hidden">
+                  <div class="absolute left-0 top-0 bottom-0 w-0.5 sky-bg"></div>
+                  <div class="flex items-center gap-2 mb-2 pl-2">
+                    <svg class="w-4 h-4 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                    <span class="text-sm font-semibold text-blue-900">Intelligence Briefing</span>
+                  </div>
+                  <p class="text-sm text-slate-500 pl-2">Latest scan detected <strong class="text-blue-800" x-text="lastRun?.notices_found || 0"></strong> opportunities across <strong class="text-blue-800" x-text="(stats.source_counts ?? []).length"></strong> sources. <span x-text="lastRun?.notices_new || 0"></span> new opportunities require assessment.</p>
+                </div>
+                <div class="p-4 rounded-lg border border-gray-200" x-show="(stats.total_analyzed || 0) === 0 && (stats.total_notices || 0) > 0">
+                  <div class="flex items-center gap-2 mb-2">
+                    <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01"/></svg>
+                    <span class="text-sm font-semibold text-amber-600">Pending Assessment</span>
+                  </div>
+                  <p class="text-sm text-slate-500"><strong x-text="stats.total_notices ?? 0"></strong> unassessed opportunities. Configure AI in <button @click="navigate('settings')" class="font-medium text-blue-950 underline" data-ripple-light="true">Settings</button> and run analysis.</p>
+                </div>
+                <div class="p-4 rounded-lg border border-gray-200" x-show="!stats.total_notices">
+                  <p class="text-sm text-slate-500">Run your first intelligence scan to receive strategic recommendations.</p>
+                </div>
+              </div>
+            </template>
+            <template x-if="!runs.length">
+              <div class="text-center py-10">
+                <p class="text-sm text-slate-400">No data to analyze yet. Intelligence recommendations appear after scanning.</p>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <!-- OPPORTUNITIES -->
+      <div id="page-opportunities" class="page fade-in" x-show="!loading.page" :class="{ 'active': page === 'opportunities' }" x-cloak>
+        <div class="material-card">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <h3 class="text-base font-semibold text-blue-950">Opportunities</h3>
+              <span class="text-xs text-slate-400 font-mono" x-text="allNotices.length + ' records'"></span>
+            </div>
+            <div class="relative inline-flex">
+              <button @click="oppFiltersOpen = !oppFiltersOpen" class="btn-ghost btn-sm p-1.5" data-tooltip-target="opp-filters-tip" data-ripple-light="true">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+              </button>
+              <div data-tooltip="opp-filters-tip" data-tooltip-placement="bottom" class="absolute top-full mt-1 left-1/2 -translate-x-1/2 whitespace-nowrap pointer-events-none opacity-0 transition-opacity duration-300 text-xs bg-slate-900 text-white px-2 py-1 rounded">Toggle filters</div>
+            </div>
+          </div>
+          <div x-show="oppFiltersOpen" x-cloak>
+            <div class="flex flex-wrap items-center gap-2 mb-4 pb-4 border-b border-gray-100">
+              <div class="relative flex-1 min-w-[200px]">
+                <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" x-model="oppSearch" placeholder="Search title, organization, country..." class="input pl-9 text-xs w-full">
+              </div>
+              <select x-model="oppSourceFilter" class="select-input text-xs w-36">
+                <option value="">All Sources</option>
+                <template x-for="s in sources" :key="s">
+                  <option :value="s" x-text="s"></option>
+                </template>
+              </select>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 mb-5">
+            <button @click="oppPositionFilter = ''" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300" :class="oppPositionFilter === '' ? 'sky-bg text-white shadow-sm' : 'text-slate-500 hover:text-blue-950 hover:bg-sky-50'" data-ripple-light="true">All</button>
+            <button @click="oppPositionFilter = 'Pursue Immediately'" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300" :class="oppPositionFilter === 'Pursue Immediately' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-500 hover:text-blue-950 hover:bg-sky-50'" data-ripple-light="true">Pursue</button>
+            <button @click="oppPositionFilter = 'Pursue with Consortium'" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300" :class="oppPositionFilter === 'Pursue with Consortium' ? 'sky-bg text-white shadow-sm' : 'text-slate-500 hover:text-blue-950 hover:bg-sky-50'" data-ripple-light="true">Consortium</button>
+            <button @click="oppPositionFilter = 'Monitor'" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300" :class="oppPositionFilter === 'Monitor' ? 'bg-amber-500 text-white shadow-sm' : 'text-slate-500 hover:text-blue-950 hover:bg-sky-50'" data-ripple-light="true">Monitor</button>
+            <button @click="oppPositionFilter = 'Decline'" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300" :class="oppPositionFilter === 'Decline' ? 'bg-red-600 text-white shadow-sm' : 'text-slate-500 hover:text-blue-950 hover:bg-sky-50'" data-ripple-light="true">Decline</button>
+          </div>
+          <template x-if="filteredNotices.length" x-data="{ selectedOpps: [], pageOpp: 1, perPage: 15 }">
+            <div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th class="w-10"><input type="checkbox" @click="selectedOpps = selectedOpps.length === filteredNotices.length ? [] : filteredNotices.map(n => n.id)" class="checkbox"></th>
+                      <th class="w-10">#</th>
+                      <th>Source</th>
+                      <th>Title</th>
+                      <th>Organization</th>
+                      <th>Country</th>
+                      <th>Score</th>
+                      <th>Position</th>
+                      <th>Batch</th>
+                      <th class="text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template x-for="(n, i) in filteredNotices.slice((pageOpp-1)*perPage, pageOpp*perPage)" :key="n.id">
+                      <tr @click="openOppDetail(n)" class="cursor-pointer">
+                        <td><input type="checkbox" x-model="selectedOpps" :value="n.id" class="checkbox" @click.stop></td>
+                        <td class="text-xs text-slate-400 font-mono" x-text="(pageOpp-1)*perPage + i + 1"></td>
+                        <td><span class="badge-neutral text-[10px]" x-text="n.source"></span></td>
+                        <td class="max-w-xs truncate font-medium" x-text="(n.title || '').substring(0, 70)"></td>
+                        <td class="text-slate-500 max-w-[140px] truncate" x-text="n.organization || '—'"></td>
+                        <td class="text-slate-500" x-text="n.country || '—'"></td>
+                        <td>
+                          <template x-if="n.analysis">
+                            <span class="font-bold font-mono" :style="'color:' + (n.analysis.score >= 70 ? 'var(--success)' : n.analysis.score >= 40 ? 'var(--warning)' : 'var(--danger)')" x-text="n.analysis.score"></span>
+                          </template>
+                          <template x-if="!n.analysis">
+                            <span class="text-slate-400">—</span>
+                          </template>
+                        </td>
+                        <td>
+                          <template x-if="n.analysis">
+                            <span :class="n.analysis.suggested_position === 'Pursue Immediately' ? 'badge-success' : n.analysis.suggested_position === 'Pursue with Consortium' ? 'badge-info' : n.analysis.suggested_position === 'Monitor' ? 'badge-warning' : 'badge-danger'" class="text-[10px]" x-text="n.analysis.suggested_position"></span>
+                          </template>
+                          <template x-if="!n.analysis">
+                            <span class="text-slate-400">—</span>
+                          </template>
+                        </td>
+                        <td class="font-mono text-xs text-slate-400" x-text="(n.batch_id || '').substring(0, 18)"></td>
+                        <td class="text-right">
+                          <button @click.stop="openOppDetail(n)" class="btn-ghost btn-xs" data-ripple-light="true">View</button>
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+              <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                <span class="text-xs text-slate-400" x-text="'Showing ' + Math.min(selectedOpps.length || 1, 1) + '-' + filteredNotices.length + ' of ' + filteredNotices.length"></span>
+                <div class="flex items-center gap-1">
+                  <button @click="pageOpp = Math.max(1, pageOpp - 1)" class="pagination-btn text-xs" :disabled="pageOpp === 1" data-ripple-light="true">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                  </button>
+                  <template x-for="p in Math.ceil(filteredNotices.length / perPage)" :key="p">
+                    <button @click="pageOpp = p" class="pagination-btn" :class="{ 'active': pageOpp === p }" x-text="p" data-ripple-light="true"></button>
+                  </template>
+                  <button @click="pageOpp = Math.min(Math.ceil(filteredNotices.length / perPage), pageOpp + 1)" class="pagination-btn text-xs" :disabled="pageOpp === Math.ceil(filteredNotices.length / perPage)" data-ripple-light="true">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </template>
+          <template x-if="!filteredNotices.length">
+            <div class="text-center py-12">
+              <svg class="w-16 h-16 mx-auto text-slate-200 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              <p class="text-sm text-slate-400 mb-2">No opportunities match your filters.</p>
+              <button @click="oppSearch = ''; oppSourceFilter = ''; oppPositionFilter = ''" class="text-xs font-medium text-blue-950 underline" data-ripple-light="true">Clear filters</button>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- INTELLIGENCE -->
+      <div id="page-intelligence" class="page fade-in" x-show="!loading.page" :class="{ 'active': page === 'intelligence' }" x-cloak>
+        <div class="material-card">
+          <div class="flex items-center justify-between mb-5">
+            <h3 class="text-base font-semibold text-blue-950">Intelligence Feed</h3>
+            <span class="flex items-center gap-2 text-xs text-slate-400">
+              <span class="w-2 h-2 rounded-full sky-bg dot-pulse"></span>
+              <span x-text="runs.length + ' events'"></span>
+            </span>
+          </div>
+          <div class="flex items-center gap-2 mb-5 pb-4 border-b border-gray-100">
+            <button @click="intelFilter = 'all'" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-300" :class="intelFilter === 'all' ? 'sky-bg text-white shadow-sm' : 'text-slate-500 hover:text-blue-950 hover:bg-sky-50'" data-ripple-light="true">All</button>
+            <button @click="intelFilter = 'completed'" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-300" :class="intelFilter === 'completed' ? 'sky-bg text-white shadow-sm' : 'text-slate-500 hover:text-blue-950 hover:bg-sky-50'" data-ripple-light="true">Completed</button>
+            <button @click="intelFilter = 'running'" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-300" :class="intelFilter === 'running' ? 'sky-bg text-white shadow-sm' : 'text-slate-500 hover:text-blue-950 hover:bg-sky-50'" data-ripple-light="true">Running</button>
+            <button @click="intelFilter = 'failed'" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-300" :class="intelFilter === 'failed' ? 'sky-bg text-white shadow-sm' : 'text-slate-500 hover:text-blue-950 hover:bg-sky-50'" data-ripple-light="true">Failed</button>
+          </div>
+          <template x-if="filteredRuns.length">
+            <div class="space-y-2">
+              <template x-for="(run, i) in filteredRuns" :key="run.id">
+                <div class="intel-item" @click="loadRunDetail(run.batch_id)" data-ripple-light="true">
+                  <div class="flex flex-col items-center">
+                    <div class="w-2.5 h-2.5 rounded-full mt-0.5 shrink-0" :style="'background:' + (run.status === 'completed' ? 'var(--success)' : run.status === 'running' ? 'var(--info)' : 'var(--danger)')"></div>
+                    <div x-show="i < filteredRuns.length - 1" class="w-px flex-1 bg-slate-200"></div>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                      <span class="text-sm font-semibold" x-text="'Intelligence Scan \u2014 ' + run.batch_id"></span>
+                      <span :class="run.status === 'completed' ? 'badge-success' : run.status === 'running' ? 'badge-warning' : 'badge-danger'" class="text-[10px]"><span x-show="run.status === 'running'" class="dot-pulse mr-1 inline-block w-1.5 h-1.5 rounded-full bg-amber-400"></span><span x-text="run.status"></span></span>
+                    </div>
+                    <div class="flex items-center gap-1.5 mt-1.5 text-xs text-slate-400 flex-wrap">
+                      <span><strong class="text-blue-700" x-text="run.notices_found ?? 0"></strong> found</span>
+                      <span class="text-slate-300">&#183;</span>
+                      <span><strong class="text-blue-700" x-text="run.notices_new ?? 0"></strong> new</span>
+                      <span class="text-slate-300">&#183;</span>
+                      <span><strong class="text-blue-700" x-text="run.analyses_completed ?? 0"></strong> analyzed</span>
+                      <span class="text-slate-300">&#183;</span>
+                      <span><strong class="text-blue-700" x-text="run.emails_sent ?? 0"></strong> emailed</span>
+                      <span class="ml-auto text-slate-500" x-text="timeAgo(run.started_at) + ' \u00b7 ' + duration(run)"></span>
+                    </div>
+                    <div x-show="analysisProgress[run.batch_id]" class="flex items-center gap-2 mt-1.5 text-xs text-sky-600">
+                      <svg class="w-3 h-3 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                      <span x-text="analysisProgress[run.batch_id]?.message"></span>
+                      <span x-show="analysisProgress[run.batch_id]?.total > 0" x-text="'(' + analysisProgress[run.batch_id]?.completed + '/' + analysisProgress[run.batch_id]?.total + ')'"></span>
+                    </div>
+                    <div class="flex items-center gap-1.5 mt-2.5 pt-2.5 border-t border-gray-100" x-show="run.status !== 'running'">
+                      <button x-show="!batchLoading[run.batch_id]" @click.stop="triggerBatchAnalysis(run.batch_id)" class="btn-primary btn-xs" data-ripple-light="true">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                        <span>Analyze</span>
+                      </button>
+                      <button x-show="!batchLoading[run.batch_id]" @click.stop="triggerBatchForceAnalysis(run.batch_id)" class="btn-primary btn-xs" data-ripple-light="true">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        <span>Re-analyze</span>
+                      </button>
+                      <div x-show="batchLoading[run.batch_id] === 'analyzing'" class="flex items-center gap-1.5 text-xs text-sky-600 font-medium">
+                        <svg class="w-3 h-3 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        <span>Analyzing...</span>
+                      </div>
+                      <button x-show="run.notices_found > 0 && batchLoading[run.batch_id] !== 'emailing'" @click.stop="sendRunEmail(run.batch_id)" class="btn-primary btn-xs" data-ripple-light="true">
+                        <svg x-show="batchLoading[run.batch_id] !== 'emailing'" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        <svg x-show="batchLoading[run.batch_id] === 'emailing'" class="w-3 h-3 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        <span x-text="batchLoading[run.batch_id] === 'emailing' ? 'Sending...' : 'Email'"></span>
+                      </button>
+                      <button x-show="run.notices_found > 0" @click.stop="window.open('/api/runs/' + run.batch_id + '/export', '_blank')" class="btn-primary btn-xs" data-ripple-light="true">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <span>Download</span>
+                      </button>
+                      <button x-show="run.status !== 'running'" @click.stop="confirmAction('Delete ' + run.batch_id + '?', 'This will permanently delete all ' + (run.notices_found || 0) + ' opportunities found in this scan.', () => deleteRun(run.batch_id), 'danger')" class="btn-xs ml-auto" style="color:#94a3b8" data-ripple-light="true">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                      </button>
+                    </div>
+                    <p x-show="run.error" class="mt-2 text-xs text-red-500" x-text="run.error"></p>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </template>
+          <template x-if="!filteredRuns.length && runs.length">
+            <div class="text-center py-8">
+              <p class="text-sm text-slate-400">No runs match the selected filter.</p>
+            </div>
+          </template>
+          <template x-if="!runs.length">
+            <div class="text-center py-16">
+              <svg class="w-16 h-16 mx-auto text-slate-200 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              <p class="text-sm text-slate-400 mb-2">Intelligence feed is empty.</p>
+              <p class="text-xs text-slate-400">Schedule a scan or <button @click="triggerScrape" class="font-medium underline" data-ripple-light="true">run one now</button> to populate the feed.</p>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- ORGANIZATIONS -->
+      <div id="page-organizations" class="page fade-in" x-show="!loading.page" :class="{ 'active': page === 'organizations' }" x-cloak>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="material-card lg:col-span-2">
+            <div class="flex items-center justify-between mb-5">
+              <h3 class="text-base font-semibold text-blue-950">Source Overview</h3>
+              <span class="text-xs text-slate-400" x-text="(stats.source_counts ?? []).length + ' sources'"></span>
+            </div>
+            <template x-if="(stats.source_counts ?? []).length">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <template x-for="s in (stats.source_counts ?? [])" :key="s.source">
+                  <div class="p-4 rounded-lg border border-gray-200 hover:border-slate-300 transition-colors" data-ripple-light="true">
+                    <div class="flex items-center justify-between mb-2">
+                      <div class="flex items-center gap-2">
+                        <div class="org-logo bg-gradient-to-br from-slate-600 to-slate-800" x-text="(s.source || '?')[0].toUpperCase()"></div>
+                        <span class="font-semibold text-sm text-blue-900" x-text="s.source"></span>
+                      </div>
+                      <span class="text-lg font-bold text-blue-950" x-text="s.count"></span>
+                    </div>
+                    <div class="w-full bg-sky-50 rounded-full h-1.5 overflow-hidden">
+                      <div class="h-full rounded-full gradient-primary" :style="'width:' + (s.count / Math.max(...(stats.source_counts ?? []).map(x => x.count), 1) * 100) + '%'"></div>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-2" x-text="Math.round(s.count / Math.max(...(stats.source_counts ?? []).map(x => x.count), 1) * 100) + '% of total intelligence'"></p>
+                  </div>
+                </template>
+              </div>
+            </template>
+            <template x-if="!(stats.source_counts ?? []).length">
+              <div class="text-center py-12">
+                <p class="text-sm text-slate-400">No source data yet.</p>
+              </div>
+            </template>
+          </div>
+          <div class="material-card">
+            <h3 class="text-base font-semibold mb-5 text-blue-950">Intelligence Sources</h3>
+            <div class="space-y-3 text-sm">
+              <div class="flex items-center gap-3 p-3 rounded-lg bg-blue-50" data-ripple-light="true">
+                <div class="org-logo bg-gradient-to-br from-blue-700 to-blue-500">UN</div>
+                <div><span class="font-medium text-blue-900">UNGM</span><p class="text-xs text-slate-400">United Nations Global Marketplace</p></div>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-lg bg-blue-50" data-ripple-light="true">
+                <div class="org-logo bg-gradient-to-br from-green-700 to-green-500">WB</div>
+                <div><span class="font-medium text-blue-900">World Bank</span><p class="text-xs text-slate-400">Projects & Operations</p></div>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-lg bg-blue-50" data-ripple-light="true">
+                <div class="org-logo bg-gradient-to-br from-cyan-700 to-cyan-500">GZ</div>
+                <div><span class="font-medium text-blue-900">GIZ</span><p class="text-xs text-slate-400">German Development Cooperation</p></div>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-lg bg-blue-50" data-ripple-light="true">
+                <div class="org-logo bg-gradient-to-br from-red-700 to-red-500">FC</div>
+                <div><span class="font-medium text-blue-900">FCDO</span><p class="text-xs text-slate-400">UK Foreign & Development Office</p></div>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-lg bg-blue-50" data-ripple-light="true">
+                <div class="org-logo bg-gradient-to-br from-teal-700 to-teal-500">DA</div>
+                <div><span class="font-medium text-blue-900">DevelopmentAid</span><p class="text-xs text-slate-400">Development Sector Tenders</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REPORTS -->
+      <div id="page-reports" class="page fade-in" x-show="!loading.page" :class="{ 'active': page === 'reports' }" x-cloak>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="material-card lg:col-span-2">
+            <div class="flex items-center justify-between mb-5">
+              <h3 class="text-base font-semibold text-blue-950">Scan History</h3>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-slate-400 font-mono" x-text="runs.length + ' scans'"></span>
+                <div class="relative inline-flex">
+                  <button @click="loadRuns" class="btn-ghost btn-xs p-1.5" data-tooltip-target="refresh-tip" data-ripple-light="true">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                  </button>
+                  <div data-tooltip="refresh-tip" class="absolute top-full mt-1 left-1/2 -translate-x-1/2 whitespace-nowrap pointer-events-none opacity-0 transition-opacity duration-300 text-xs bg-slate-900 text-white px-2 py-1 rounded">Refresh</div>
+                </div>
+              </div>
+            </div>
+            <template x-if="runs.length">
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Scan ID</th><th>Status</th><th>Found</th><th>New</th><th>Analyzed</th><th>Emailed</th><th>Duration</th><th>Started</th></tr></thead>
+                  <tbody>
+                    <template x-for="run in runs" :key="run.id">
+                      <tr @click="loadRunDetail(run.batch_id)" class="cursor-pointer" data-ripple-light="true">
+                        <td class="font-mono text-xs font-medium text-blue-900" x-text="run.batch_id"></td>
+                        <td><span :class="run.status === 'completed' ? 'badge-success' : run.status === 'running' ? 'badge-warning' : 'badge-danger'" class="text-[10px]"><span x-show="run.status === 'running'" class="w-1.5 h-1.5 rounded-full bg-amber-400 dot-pulse mr-1 inline-block"></span><span x-text="run.status"></span></span></td>
+                        <td x-text="run.notices_found ?? 0"></td>
+                        <td x-text="run.notices_new ?? 0"></td>
+                        <td x-text="run.analyses_completed ?? 0"></td>
+                        <td x-text="run.emails_sent ?? 0"></td>
+                        <td class="text-xs text-slate-500 font-mono" x-text="duration(run)"></td>
+                        <td class="text-xs text-slate-400" x-text="fmtDate(run.started_at)"></td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+            </template>
+            <template x-if="!runs.length">
+              <div class="text-center py-12">
+                <svg class="w-16 h-16 mx-auto text-slate-200 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                <p class="text-sm text-slate-400 mb-2">No scan reports yet.</p>
+                <p class="text-xs text-slate-400">Reports will appear after each intelligence scan.</p>
+              </div>
+            </template>
+          </div>
+          <div class="material-card">
+            <h3 class="text-base font-semibold mb-5 text-blue-950">Quick Export</h3>
+            <div class="space-y-3">
+              <button class="btn-primary w-full text-xs justify-start" @click="$store.toast('Export initiated. Report will be sent to configured recipients.', 'info')" data-ripple-light="true">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Weekly Intelligence Brief
+              </button>
+              <button class="btn-primary w-full text-xs justify-start" @click="$store.toast('Export initiated.', 'info')" data-ripple-light="true">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Opportunity Performance Report
+              </button>
+              <p class="text-xs text-slate-400 pt-2">Full report generation requires AI analysis configuration.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MONITORING -->
+      <div id="page-monitoring" class="page fade-in" x-show="!loading.page" :class="{ 'active': page === 'monitoring' }" x-cloak>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="material-card lg:col-span-2">
+            <div class="flex items-center justify-between mb-5">
+              <h3 class="text-base font-semibold text-blue-950">Source Monitoring</h3>
+              <span :class="scrapeRunning ? 'badge-warning' : 'badge-success'" class="text-[10px]">
+                <span :class="scrapeRunning ? 'dot-pulse bg-amber-400' : 'bg-emerald-400'" class="w-1.5 h-1.5 rounded-full mr-1 inline-block"></span>
+                <span x-text="scrapeRunning ? 'Active Scan' : 'Idle'"></span>
+              </span>
+            </div>
+            <div class="space-y-1">
+              <template x-for="src in sourcesList" :key="src.name">
+                <div class="flex items-center gap-4 p-3.5 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors" data-ripple-light="true">
+                  <div class="w-2.5 h-2.5 rounded-full shrink-0" :style="'background:' + (scrapeRunning ? 'var(--info)' : 'var(--success)')"></div>
+                  <div class="flex-1">
+                    <span class="text-sm font-medium text-blue-900" x-text="src.name"></span>
+                    <p class="text-xs text-slate-400" x-text="src.desc"></p>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="badge-neutral text-[10px]" x-text="src.status"></span>
+                    <span class="text-xs font-mono text-slate-400" x-text="sourceCount(src.name)"></span>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+          <div class="material-card">
+            <h3 class="text-base font-semibold mb-5 text-blue-950">System Health</h3>
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-slate-500">Database</span>
+                <span class="badge-success text-[10px]">Connected</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-slate-500">Last Scan</span>
+                <span class="text-xs font-mono text-slate-400" x-text="lastRun ? timeAgo(lastRun.started_at) : 'Never'"></span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-slate-500">Sources Active</span>
+                <span class="text-xs font-mono text-slate-400" x-text="(stats.source_counts ?? []).length + ' / 8'"></span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-slate-500">Total Notices</span>
+                <span class="text-xs font-mono text-slate-400" x-text="stats.total_notices ?? 0"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div id="page-settings" class="page fade-in" x-show="!loading.page" :class="{ 'active': page === 'settings' }" x-cloak x-data="{ settingsTab: 'general', systemPrompt: '', promptRefreshed: null, loadSystemPrompt() { fetch('/api/system-prompt').then(r=>r.json()).then(d=>{ this.systemPrompt = d.content; this.promptRefreshed = new Date(); }).catch(()=>{ this.systemPrompt = 'Failed to load system prompt.'; }) }, fmtDate(d) { return d.toLocaleString(); } }">
+        <div class="max-w-2xl mx-auto">
+          <div class="material-card">
+            <div class="flex items-center gap-2 mb-6 pb-4 border-b border-gray-100">
+              <button @click="settingsTab = 'recipients'" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-300" :class="settingsTab === 'recipients' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:text-blue-950 hover:bg-sky-50'" data-ripple-light="true">Recipients</button>
+              <button @click="settingsTab = 'general'" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-300" :class="settingsTab === 'general' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:text-blue-950 hover:bg-sky-50'" data-ripple-light="true">General</button>
+              <button @click="settingsTab = 'email'" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-300" :class="settingsTab === 'email' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:text-blue-950 hover:bg-sky-50'" data-ripple-light="true">Email</button>
+              <button @click="settingsTab = 'ai'" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-300" :class="settingsTab === 'ai' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:text-blue-950 hover:bg-sky-50'" data-ripple-light="true">AI Engine</button>
+              <button @click="settingsTab = 'prompt'" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-300" :class="settingsTab === 'prompt' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:text-blue-950 hover:bg-sky-50'" data-ripple-light="true">System Prompt</button>
+            </div>
+            <div x-show="settingsTab === 'general'">
+              <h3 class="text-base font-semibold mb-5 text-blue-950">General Configuration</h3>
+              <div class="space-y-4">
+                <div>
+                  <label class="label">Provider</label>
+                  <select x-model="settings.ai_provider" class="select-input">
+                    <option value="openrouter">OpenRouter</option>
+                    <option value="openai">OpenAI</option>
+                    <option value="anthropic">Anthropic</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="label">API Key</label>
+                  <div class="relative">
+                    <input :type="showAiKey ? 'text' : 'password'" x-model="settings.ai_api_key" class="input pr-10" placeholder="sk-...">
+                    <button type="button" @click="showAiKey = !showAiKey" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" data-ripple-light="true"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button>
+                  </div>
+                </div>
+                <div>
+                  <label class="label">Model</label>
+                  <input type="text" x-model="settings.ai_model" class="input" placeholder="model-name">
+                </div>
+                <button @click="saveSettings('ai')" class="btn-primary" data-ripple-light="true">Save Changes</button>
+              </div>
+            </div>
+            <div x-show="settingsTab === 'recipients'" x-cloak>
+              <div class="flex items-center justify-between mb-5">
+                <h3 class="text-base font-semibold text-blue-950">Email Recipients</h3>
+                <span class="text-xs text-slate-400 font-mono" x-text="recipients.length + ' recipients'"></span>
+              </div>
+              <form @submit.prevent="addRecipient" class="flex gap-2 mb-4">
+                <div class="relative flex-1">
+                  <input type="email" x-model="newRecipient.email" placeholder="analyst@organization.com" class="input text-xs" :class="{ 'input-error': recError }">
+                  <p x-show="recError" class="text-xs text-red-500 mt-1" x-text="recError"></p>
+                </div>
+                <input type="text" x-model="newRecipient.name" placeholder="Name" class="input w-28 text-xs">
+                <button type="submit" class="btn-primary btn-sm text-xs whitespace-nowrap" data-ripple-light="true">Add</button>
+              </form>
+              <template x-if="recipients.length">
+                <div class="table-wrap -mx-6 px-6">
+                  <table>
+                    <thead><tr><th>Email</th><th>Name</th><th>Added</th><th class="text-right"></th></tr></thead>
+                    <tbody>
+                      <template x-for="r in recipients" :key="r.id">
+                        <tr>
+                          <td class="font-medium text-xs text-blue-900" x-text="r.email"></td>
+                          <td class="text-xs text-slate-500" x-text="r.name || '—'"></td>
+                          <td class="text-xs text-slate-400 font-mono" x-text="fmtDate(r.created_at)"></td>
+                          <td class="text-right"><button @click="confirmAction('Remove ' + r.email + '?', 'This recipient will no longer receive intelligence reports.', () => deleteRecipient(r.id), 'danger')" class="btn-ghost btn-xs text-red-500" data-ripple-light="true"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </div>
+              </template>
+              <template x-if="!recipients.length">
+                <div class="text-center py-8">
+                  <svg class="w-12 h-12 mx-auto text-slate-200 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                  <p class="text-sm text-slate-400">No intelligence recipients configured.</p>
+                  <p class="text-xs text-slate-400 mt-1">Add recipients above to receive email reports.</p>
+                </div>
+              </template>
+            </div>
+            <div x-show="settingsTab === 'email'" x-cloak>
+              <h3 class="text-base font-semibold mb-5 text-blue-950">Email Distribution</h3>
+              <div class="space-y-4">
+                <div><label class="label">SMTP Host</label><input type="text" x-model="settings.smtp_host" class="input" placeholder="smtp.gmail.com"></div>
+                <div><label class="label">Port</label><input type="text" x-model="settings.smtp_port" class="input" placeholder="587"></div>
+                <div><label class="label">Username</label><input type="text" x-model="settings.smtp_user" class="input"></div>
+                <div><label class="label">Password</label><input :type="showSmtpPass ? 'text' : 'password'" x-model="settings.smtp_pass" class="input"></div>
+                <div><label class="label">From Address</label><input type="text" x-model="settings.email_from" class="input"></div>
+                <div class="flex gap-3">
+                  <button @click="saveSettings('smtp')" class="btn-primary" data-ripple-light="true">Save SMTP</button>
+                  <button @click="testEmail" class="btn-ghost border border-gray-200" data-ripple-light="true">Test</button>
+                </div>
+                <p x-show="smtpMessage" class="text-xs" :class="smtpOk ? 'text-emerald-600' : 'text-red-500'" x-text="smtpMessage"></p>
+              </div>
+            </div>
+            <div x-show="settingsTab === 'ai'" x-cloak>
+              <h3 class="text-base font-semibold mb-5 text-blue-950">AI Intelligence Engine</h3>
+              <div class="space-y-4">
+                <div>
+                  <label class="label">Provider</label>
+                  <select x-model="settings.ai_provider" class="select-input">
+                    <option value="openrouter">OpenRouter</option>
+                    <option value="openai">OpenAI</option>
+                    <option value="anthropic">Anthropic</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="label">API Key</label>
+                  <div class="relative">
+                    <input :type="showAiKey ? 'text' : 'password'" x-model="settings.ai_api_key" class="input pr-10" placeholder="sk-...">
+                    <button type="button" @click="showAiKey = !showAiKey" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" data-ripple-light="true"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button>
+                  </div>
+                </div>
+                <div>
+                  <label class="label">Model</label>
+                  <input type="text" x-model="settings.ai_model" class="input" placeholder="model-name">
+                </div>
+                <button @click="saveSettings('ai')" class="btn-primary" data-ripple-light="true">Save Changes</button>
+              </div>
+            </div>
+            <div x-show="settingsTab === 'prompt'" x-cloak>
+              <div class="flex items-center justify-between mb-5">
+                <h3 class="text-base font-semibold text-blue-950">System Prompt</h3>
+                <span class="text-xs text-slate-400">Read-only · Last refresh: <span x-text="promptRefreshed ? fmtDate(promptRefreshed) : ''"></span></span>
+              </div>
+              <div class="prose prose-sm max-w-none text-slate-700 bg-slate-50 rounded-lg p-5 border border-slate-200 overflow-auto max-h-[65vh]" x-html="systemPrompt ? marked.parse(systemPrompt) : '&lt;p class=&quot;text-slate-400&quot;&gt;Loading...&lt;/p&gt;'"></div>
+              <div class="mt-3 flex gap-2">
+                <button @click="loadSystemPrompt" class="btn-ghost btn-sm border border-gray-200" data-ripple-light="true">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                  <span>Refresh</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- USERS -->
+      <div id="page-users" class="page fade-in" x-show="!loading.page" :class="{ 'active': page === 'users' }" x-cloak>
+        <div class="max-w-2xl mx-auto">
+          <div class="material-card">
+            <div class="flex items-center justify-between mb-5">
+              <h3 class="text-base font-semibold text-blue-950" x-text="editingUser ? 'Edit User' : 'Add User'"></h3>
+              <button x-show="editingUser" @click="editingUser = null; userForm = { username: '', email: '', name: '', password: '' }; userError = ''" class="text-xs text-slate-400 hover:text-slate-600" data-ripple-light="true">Cancel</button>
+            </div>
+            <form @submit.prevent="saveUser" class="flex flex-wrap gap-3 mb-5 pb-5 border-b border-gray-100">
+              <input type="text" x-model="userForm.username" placeholder="Username" class="input flex-1 min-w-[120px] text-xs" :disabled="editingUser !== null" required>
+              <input type="email" x-model="userForm.email" placeholder="Email" class="input flex-1 min-w-[180px] text-xs" required>
+              <input type="text" x-model="userForm.name" placeholder="Full name" class="input flex-1 min-w-[140px] text-xs">
+              <input :type="editingUser ? 'password' : 'text'" x-model="userForm.password" :placeholder="editingUser ? 'Leave blank to keep current' : 'Password'" class="input flex-1 min-w-[120px] text-xs" :required="!editingUser">
+              <button type="submit" class="btn-primary btn-sm text-xs whitespace-nowrap" data-ripple-light="true" x-text="editingUser ? 'Update' : 'Create'"></button>
+              <p x-show="userError" class="w-full text-xs text-red-500" x-text="userError"></p>
+            </form>
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-semibold text-blue-950">All Users</h3>
+              <span class="text-xs text-slate-400 font-mono" x-text="users.length + ' user(s)'"></span>
+            </div>
+            <template x-if="users.length">
+              <div class="table-wrap -mx-6 px-6">
+                <table>
+                  <thead><tr><th>Username</th><th>Email</th><th>Name</th><th>Created</th><th class="text-right"></th></tr></thead>
+                  <tbody>
+                    <template x-for="u in users" :key="u.id">
+                      <tr>
+                        <td class="font-medium text-xs text-blue-900" x-text="u.username"></td>
+                        <td class="text-xs text-slate-500" x-text="u.email"></td>
+                        <td class="text-xs text-slate-500" x-text="u.name || '\u2014'"></td>
+                        <td class="text-xs text-slate-400 font-mono" x-text="fmtDate(u.created_at)"></td>
+                        <td class="text-right whitespace-nowrap">
+                          <button @click="editUser(u)" class="btn-ghost btn-xs text-sky-600" data-ripple-light="true">Edit</button>
+                          <button @click="showChangePass(u)" class="btn-ghost btn-xs text-slate-500" data-ripple-light="true">Password</button>
+                          <button x-show="u.id !== userData?.id" @click="confirmAction('Delete ' + u.username + '?', 'This will permanently remove this user.', () => deleteUser(u.id), 'danger')" class="btn-ghost btn-xs text-red-500" data-ripple-light="true">Delete</button>
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+            </template>
+            <template x-if="!users.length">
+              <div class="text-center py-8">
+                <svg class="w-12 h-12 mx-auto text-slate-200 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197"/></svg>
+                <p class="text-sm text-slate-400">No users yet.</p>
+              </div>
+            </template>
+          </div>
+
+          <!-- Password change modal -->
+          <div x-show="passChangeUser" class="modal-overlay" x-cloak @click.self="passChangeUser = null; userPassForm = { old_password: '', new_password: '' }; userError = ''">
+            <div class="modal-panel" @click.stop>
+              <div class="flex items-center justify-between mb-5">
+                <h3 class="text-base font-semibold text-blue-950">Change Password</h3>
+                <button @click="passChangeUser = null; userPassForm = { old_password: '', new_password: '' }; userError = ''" class="btn-ghost btn-sm p-1.5" data-ripple-light="true">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+              </div>
+              <p class="text-sm text-slate-500 mb-4" x-text="'Changing password for ' + (passChangeUser?.username || passChangeUser?.email)"></p>
+              <form @submit.prevent="changeUserPassword" class="space-y-4">
+                <div>
+                  <label class="label">Current Password</label>
+                  <input type="password" x-model="userPassForm.old_password" class="input" required>
+                </div>
+                <div>
+                  <label class="label">New Password</label>
+                  <input type="password" x-model="userPassForm.new_password" class="input" minlength="6" required>
+                </div>
+                <p x-show="userError" class="text-xs text-red-500" x-text="userError"></p>
+                <div class="flex justify-end gap-3">
+                  <button type="button" @click="passChangeUser = null; userPassForm = { old_password: '', new_password: '' }; userError = ''" class="btn-ghost border border-gray-200" data-ripple-light="true">Cancel</button>
+                  <button type="submit" class="btn-primary" data-ripple-light="true">Update Password</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DOCUMENTATION -->
+      <div id="page-documentation" class="page fade-in" x-show="!loading.page" :class="{ 'active': page === 'documentation' }" x-cloak>
+        <div class="max-w-3xl mx-auto space-y-6">
+          <div class="material-card">
+            <h3 class="text-lg font-semibold mb-2 text-blue-950">NextBid Platform Guide</h3>
+            <p class="text-sm text-slate-500 mb-6">Executive Intelligence Operating System — Platform Overview</p>
+            <div class="space-y-6 text-sm">
+              <div>
+                <h4 class="font-semibold text-base mb-2 text-blue-900">Getting Started</h4>
+                <p class="text-slate-500">NextBid monitors 8 intelligence sources for procurement and funding opportunities. The platform automatically scans, assesses, and distributes intelligence reports to configured recipients.</p>
+              </div>
+              <div>
+                <h4 class="font-semibold text-base mb-2 text-blue-900">Intelligence Scan Workflow</h4>
+                <ol class="list-decimal list-inside space-y-1.5 text-slate-500">
+<li><strong class="text-blue-800">Scan</strong> — All 8 sources are scraped for new opportunities</li>
+<li><strong class="text-blue-800">Assess</strong> — AI engine evaluates each opportunity for strategic fit</li>
+<li><strong class="text-blue-800">Report</strong> — Ranked results are emailed to all recipients with Excel attachment</li>
+                </ol>
+              </div>
+              <div>
+                <h4 class="font-semibold text-base mb-2 text-blue-900">Intelligence Sources</h4>
+                <div class="grid grid-cols-2 gap-2 text-slate-500">
+                  <div>• UNGM</div>
+                  <div>• World Bank</div>
+                  <div>• GIZ</div>
+                  <div>• FCDO</div>
+                  <div>• DevelopmentAid</div>
+                  <div>• ActionAid</div>
+                  <div>• CRS</div>
+                  <div>• AfDB</div>
+                </div>
+              </div>
+              <div>
+                <h4 class="font-semibold text-base mb-2 text-blue-900">Configuration</h4>
+                <p class="text-slate-500">Configure SMTP and AI provider in <button @click="navigate('settings')" class="font-medium underline" data-ripple-light="true">Settings</button>. Add email recipients to receive intelligence reports.</p>
+              </div>
+              <div>
+                <h4 class="font-semibold text-base mb-2 text-blue-900">Keyboard Shortcuts</h4>
+                <div class="space-y-1.5 text-slate-500">
+<div><kbd class="px-1.5 py-0.5 rounded bg-sky-50 font-mono text-xs">⌘K</kbd> — Command Palette</div>
+<div><kbd class="px-1.5 py-0.5 rounded bg-sky-50 font-mono text-xs">1-9</kbd> — Navigate pages</div>
+<div><kbd class="px-1.5 py-0.5 rounded bg-sky-50 font-mono text-xs">S</kbd> — Trigger scan</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer class="shrink-0 text-center py-2.5 text-[11px] text-slate-400 bg-white lg:rounded-b-xl lg:mx-0 lg:border lg:border-gray-200/80 lg:border-t-0 lg:shadow-[0_1px_3px_0_rgba(0,0,0,0.04)]">
+      <span>&copy; 2026 NextBid <span class="text-slate-300 mx-2">|</span> Executive Intelligence Operating System <span class="text-slate-300 mx-2">|</span> v2.0</span>
+    </footer>
+  </div>
+</div>
+
+<!-- COMMAND PALETTE -->
+<div x-show="cmdPaletteOpen" class="cmd-k-modal" x-cloak @click.self="cmdPaletteOpen = false">
+  <div class="bg-white rounded-2xl shadow-2xl border border-gray-200 w-full max-w-lg mx-4 overflow-hidden fade-in">
+    <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-200">
+      <svg class="w-5 h-5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <input type="text" x-model="cmdQuery" @keydown.escape="cmdPaletteOpen = false" @keydown.enter="executeCommand" @keydown.down.prevent="cmdIndex = Math.min(cmdIndex + 1, cmdResults.length - 1)" @keydown.up.prevent="cmdIndex = Math.max(cmdIndex - 1, 0)" x-ref="cmdInput" class="cmd-k-input" placeholder="Search pages, actions, or type a command...">
+      <kbd class="text-[10px] text-slate-400 font-mono px-1.5 py-0.5 rounded bg-sky-50 shrink-0">ESC</kbd>
+    </div>
+    <div class="max-h-72 overflow-y-auto p-2">
+      <template x-for="(r, i) in cmdResults" :key="r.id">
+        <div @click="executeCmd(r)" :class="i === cmdIndex ? 'bg-blue-50' : ''" class="flex items-center gap-3 px-4 py-2.5 rounded-lg cursor-pointer transition-colors duration-100" data-ripple-light="true">
+          <span x-html="r.icon" class="w-4 h-4 text-slate-400 shrink-0"></span>
+          <div class="flex-1 min-w-0">
+            <span class="text-sm font-medium text-blue-900" x-text="r.label"></span>
+            <p class="text-xs text-slate-400 truncate" x-text="r.desc"></p>
+          </div>
+          <span class="text-[10px] font-mono text-slate-400 shrink-0" x-text="r.shortcut || ''"></span>
+        </div>
+      </template>
+      <div x-show="!cmdResults.length" class="text-center py-8">
+        <p class="text-sm text-slate-400">No results for "<span x-text="cmdQuery"></span>"</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOASTS -->
+<div class="toast-container" id="toast-container">
+  <template x-for="(t, i) in toasts" :key="t.id">
+    <div class="toast toast-enter" :class="t.type === 'success' ? 'bg-emerald-600 text-white' : t.type === 'error' ? 'bg-red-600 text-white' : t.type === 'warning' ? 'bg-amber-500 text-white' : 'bg-slate-800 text-white'" @click="dismissToast(t.id)" x-init="setTimeout(() => dismissToast(t.id), 4000)" data-ripple-light="true">
+      <span x-html="t.icon" class="w-5 h-5 shrink-0"></span>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-medium" x-text="t.message"></p>
+      </div>
+      <button class="opacity-60 hover:opacity-100 shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    </div>
+  </template>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div x-show="confirm.show"
+     x-transition:enter="transition-all duration-300 ease-out"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition-all duration-300 ease-in"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     class="modal-overlay" x-cloak @click.self="confirm.show = false">
+  <div x-show="confirm.show"
+       x-transition:enter="transition-all duration-300 ease-out"
+       x-transition:enter-start="opacity-0 -translate-y-14 scale-95"
+       x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+       x-transition:leave="transition-all duration-300 ease-in"
+       x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+       x-transition:leave-end="opacity-0 -translate-y-14 scale-95"
+       class="modal-card">
+    <div class="text-center">
+      <div class="w-14 h-14 mx-auto mb-4 rounded-full" :class="confirm.variant === 'danger' ? 'bg-red-100' : 'bg-sky-50'">
+        <svg x-show="confirm.variant === 'danger'" class="w-7 h-7 mx-auto mt-3.5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+        <svg x-show="confirm.variant !== 'danger'" class="w-7 h-7 mx-auto mt-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+      <h3 class="text-lg font-semibold mb-2 text-blue-950" x-text="confirm.title"></h3>
+      <p class="text-sm text-slate-500 mb-6" x-text="confirm.message"></p>
+      <div class="flex gap-3 justify-center">
+        <button @click="confirm.show = false" class="btn-ghost border border-gray-200 px-6" data-ripple-light="true">Cancel</button>
+        <button @click="confirm.action(); confirm.show = false" :class="confirm.variant === 'danger' ? 'btn-danger' : 'btn-primary'" class="px-6" data-ripple-light="true">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- OPPORTUNITY DETAIL MODAL -->
+<div x-show="oppDetail.show"
+     x-transition:enter="transition-all duration-300 ease-out"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition-all duration-300 ease-in"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     class="modal-overlay items-start pt-12 overflow-y-auto" x-cloak @click.self="oppDetail.show = false">
+  <div x-show="oppDetail.show"
+       x-transition:enter="transition-all duration-300 ease-out"
+       x-transition:enter-start="opacity-0 -translate-y-8 scale-95"
+       x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+       x-transition:leave="transition-all duration-300 ease-in"
+       x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+       x-transition:leave-end="opacity-0 -translate-y-8 scale-95"
+       class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl mx-4 mb-12 overflow-hidden">
+    <div class="flex items-center justify-between p-5 border-b border-gray-200">
+      <div class="flex-1 min-w-0">
+        <h3 class="text-base font-semibold text-blue-950 truncate" x-text="oppDetail.data?.title || 'Opportunity Detail'"></h3>
+        <p class="text-xs text-slate-400 font-mono mt-0.5" x-text="oppDetail.data?.notice_id"></p>
+      </div>
+      <button @click="oppDetail.show = false" class="btn-ghost btn-sm p-1.5 shrink-0 ml-3" data-ripple-light="true"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    </div>
+    <template x-if="oppDetail.data">
+      <div class="p-5 space-y-4 text-sm">
+        <div class="flex items-center gap-4">
+          <div x-show="oppDetail.data.analysis" class="flex items-center gap-2">
+            <span class="text-xs text-slate-400">Score</span>
+            <span class="text-2xl font-bold font-mono" :style="'color:' + (oppDetail.data.analysis.score >= 70 ? 'var(--success)' : oppDetail.data.analysis.score >= 40 ? 'var(--warning)' : 'var(--danger)')" x-text="oppDetail.data.analysis.score"></span>
+          </div>
+          <div x-show="oppDetail.data.analysis">
+            <span class="badge" :class="oppDetail.data.analysis.suggested_position === 'Pursue Immediately' ? 'badge-success' : oppDetail.data.analysis.suggested_position === 'Pursue with Consortium' ? 'badge-info' : oppDetail.data.analysis.suggested_position === 'Monitor' ? 'badge-warning' : 'badge-danger'" x-text="oppDetail.data.analysis.suggested_position"></span>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div><span class="text-xs text-slate-400 block">Organization</span><span class="font-medium text-blue-900" x-text="(oppDetail.data.organization || '—')"></span></div>
+          <div><span class="text-xs text-slate-400 block">Country</span><span class="text-blue-800" x-text="(oppDetail.data.country || '—')"></span></div>
+          <div><span class="text-xs text-slate-400 block">Source</span><span class="badge-neutral text-[10px]" x-text="(oppDetail.data.source || '—')"></span></div>
+          <div><span class="text-xs text-slate-400 block">Deadline</span><span class="text-blue-800" x-text="(oppDetail.data.deadline || '—')"></span></div>
+        </div>
+        <div x-show="oppDetail.data.description">
+          <span class="text-xs text-slate-400 block mb-1">Description</span>
+          <p class="text-slate-500 text-xs leading-relaxed" x-text="(oppDetail.data.description || '').substring(0, 500)"></p>
+        </div>
+        <div x-show="oppDetail.data.url">
+          <a :href="oppDetail.data.url" target="_blank" class="font-medium text-blue-950 underline text-xs">View original source →</a>
+        </div>
+      </div>
+    </template>
+  </div>
+</div>
+
+<!-- RUN DETAIL MODAL -->
+<div x-show="runDetail.show"
+     x-transition:enter="transition-all duration-300 ease-out"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition-all duration-300 ease-in"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     class="modal-overlay items-start pt-12 overflow-y-auto" x-cloak @click.self="runDetail.show = false">
+  <div x-show="runDetail.show"
+       x-transition:enter="transition-all duration-300 ease-out"
+       x-transition:enter-start="opacity-0 -translate-y-8 scale-95"
+       x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+       x-transition:leave="transition-all duration-300 ease-in"
+       x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+       x-transition:leave-end="opacity-0 -translate-y-8 scale-95"
+       class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl mx-4 mb-12 max-h-[80vh] flex flex-col">
+    <div class="flex items-center justify-between p-5 border-b border-gray-200 shrink-0">
+      <div>
+        <h3 class="text-sm font-semibold font-mono text-blue-950" x-text="runDetail.data?.batch_id"></h3>
+        <p class="text-xs text-slate-400" x-text="runDetail.data?.started_at ? fmtDate(runDetail.data.started_at) : ''"></p>
+      </div>
+      <button @click="runDetail.show = false" class="btn-ghost btn-sm p-1.5" data-ripple-light="true"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    </div>
+    <div x-show="runDetail.loading" class="p-8 text-center text-sm text-slate-400">
+      <svg class="w-8 h-8 mx-auto animate-spin mb-3" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+      Loading intelligence data...
+    </div>
+    <div x-show="!runDetail.loading" class="overflow-y-auto p-5">
+      <template x-if="(runDetail.data?.notices ?? []).length">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Source</th><th>Title</th><th>Country</th><th>Score</th><th>Position</th></tr></thead>
+            <tbody>
+              <template x-for="n in runDetail.data.notices" :key="n.id">
+                <tr>
+                  <td><span class="badge-neutral text-[10px]" x-text="n.source"></span></td>
+                  <td class="max-w-xs truncate font-medium text-blue-900" x-text="(n.title || '').substring(0, 60)"></td>
+                  <td class="text-slate-500 text-xs" x-text="n.country || '—'"></td>
+                  <td><template x-if="n.analysis"><span class="font-bold font-mono" :style="'color:' + (n.analysis.score >= 70 ? 'var(--success)' : n.analysis.score >= 40 ? 'var(--warning)' : 'var(--danger)')" x-text="n.analysis.score"></span></template><template x-if="!n.analysis"><span class="text-slate-400">—</span></template></td>
+                  <td><template x-if="n.analysis"><span :class="n.analysis.suggested_position === 'Pursue Immediately' ? 'badge-success' : n.analysis.suggested_position === 'Pursue with Consortium' ? 'badge-info' : n.analysis.suggested_position === 'Monitor' ? 'badge-warning' : 'badge-danger'" class="text-[10px]" x-text="n.analysis.suggested_position"></span></template><template x-if="!n.analysis"><span class="text-slate-400">—</span></template></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </template>
+      <template x-if="!(runDetail.data?.notices ?? []).length">
+        <p class="text-center py-8 text-sm text-slate-400">No notices recorded in this scan.</p>
+      </template>
+    </div>
+  </div>
+</div>
+
+<script>
+function app() {
+  return {
+    authenticated: false,
+    userData: null,
+    loginUsername: '',
+    loginPassword: '',
+    loginShowPassword: false,
+    loginLoading: false,
+    authError: '',
+    authMessage: '',
+    showForgotPassword: false,
+    forgotEmail: '',
+    forgotMessage: '',
+    forgotError: '',
+    forgotLoading: false,
+    forgotSent: false,
+    forgotResetLink: '',
+    showResetPassword: false,
+    resetToken: '',
+    resetPassword: '',
+    resetConfirm: '',
+    resetMessage: '',
+    resetError: '',
+    resetLoading: false,
+    page: 'dashboard',
+    sidebarOpen: false,
+    globalSearch: '',
+    navItems: [
+      { id: 'dashboard', label: 'Dashboard', icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v5a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zm10-3a1 1 0 011-1h4a1 1 0 011 1v6a1 1 0 01-1 1h-4a1 1 0 01-1-1v-6z"/>' },
+      { id: 'opportunities', label: 'Opportunities', icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>' },
+      { id: 'intelligence', label: 'Intelligence Feed', icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>' },
+      { id: 'organizations', label: 'Organizations', icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>' },
+      { id: 'reports', label: 'Reports', icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>' },
+      { id: 'monitoring', label: 'Monitoring', icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>' },
+      { id: 'settings', label: 'Settings', icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>' },
+      { id: 'documentation', label: 'Documentation', icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>' },
+      { id: 'users', label: 'Users', icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>' },
+    ],
+    stats: {},
+    runs: [],
+    lastRun: null,
+    recipients: [],
+    settings: {},
+    allNotices: [],
+    sources: [],
+    loading: { page: true },
+    selectedRunId: null,
+    recipientSearch: '',
+    selectedRecipients: [],
+    newRecipient: { email: '', name: '' },
+    recError: '',
+    showSmtpPass: false,
+    showAiKey: false,
+    smtpMessage: '',
+    smtpOk: false,
+    scrapeRunning: false,
+    scrapeBatchId: null,
+    scrapeProgress: null,
+    scrapePollTimer: null,
+    pollTimer: null,
+    loadingNotices: false,
+    oppSearch: '',
+    oppSourceFilter: '',
+    oppPositionFilter: '',
+    oppFiltersOpen: false,
+    cmdPaletteOpen: false,
+    cmdQuery: '',
+    cmdIndex: 0,
+    intelFilter: 'all',
+    batchLoading: {},
+    analysisProgress: {},
+    analysisPollTimers: {},
+    runDetail: { show: false, loading: false, data: null },
+    oppDetail: { show: false, data: null },
+    confirm: { show: false, title: '', message: '', action: null, variant: 'danger' },
+    toasts: [],
+    toastId: 0,
+    users: [],
+    userForm: { username: '', email: '', name: '', password: '' },
+    editingUser: null,
+    userPassForm: { old_password: '', new_password: '' },
+    passChangeUser: null,
+    userError: '',
+    sourcesList: [
+      { name: 'UNGM', desc: 'United Nations Global Marketplace', status: 'Active' },
+      { name: 'World Bank', desc: 'Projects & Operations', status: 'Active' },
+      { name: 'GIZ', desc: 'German Development Cooperation', status: 'Active' },
+      { name: 'FCDO', desc: 'UK Foreign, Commonwealth & Development Office', status: 'Active' },
+      { name: 'DevelopmentAid', desc: 'Development Sector Tenders', status: 'Active' },
+      { name: 'ActionAid', desc: 'International Development', status: 'Active' },
+      { name: 'CRS', desc: 'Catholic Relief Services', status: 'Active' },
+      { name: 'AfDB', desc: 'African Development Bank', status: 'Active' },
+    ],
+    get pageTitle() {
+      const titles = {
+        dashboard: 'Dashboard', opportunities: 'Opportunities', intelligence: 'Intelligence Feed',
+        organizations: 'Organizations', reports: 'Reports',
+        monitoring: 'Monitoring', settings: 'Settings',
+        documentation: 'Documentation', users: 'Users'
+      };
+      return 'NextBid — ' + (titles[this.page] || 'Dashboard');
+    },
+    get pageSubtitle() {
+      const subs = {
+        dashboard: 'Executive intelligence briefing',
+        opportunities: 'Browse and assess procurement opportunities',
+        intelligence: 'Real-time intelligence activity stream',
+        organizations: 'Source intelligence overview',
+        reports: 'Scan history and report exports',
+        monitoring: 'System health and source monitoring',
+        settings: 'Email recipients and system configuration',
+        documentation: 'Platform guide and reference',
+        users: 'Manage system user accounts'
+      };
+      return subs[this.page] || '';
+    },
+    get smtpConfigured() {
+      return !!(this.settings.smtp_user && this.settings.smtp_pass);
+    },
+    get aiConfigured() {
+      return !!(this.settings.ai_api_key);
+    },
+    get filteredRuns() {
+      if (this.intelFilter === 'all') return this.runs;
+      return this.runs.filter(r => r.status === this.intelFilter);
+    },
+    get filteredNotices() {
+      let items = this.allNotices;
+      if (this.oppSearch) {
+        const q = this.oppSearch.toLowerCase();
+        items = items.filter(n => (n.title || '').toLowerCase().includes(q) || (n.organization || '').toLowerCase().includes(q) || (n.country || '').toLowerCase().includes(q));
+      }
+      if (this.oppSourceFilter) items = items.filter(n => n.source === this.oppSourceFilter);
+      if (this.oppPositionFilter) items = items.filter(n => n.analysis && n.analysis.suggested_position === this.oppPositionFilter);
+      return items;
+    },
+    get cmdResults() {
+      if (!this.cmdQuery) return this.navItems.map(item => ({ ...item, id: 'nav-' + item.id, desc: 'Navigate to ' + item.label, action: () => this.navigate(item.id) }));
+      const q = this.cmdQuery.toLowerCase();
+      const results = [];
+      for (const item of this.navItems) {
+        if (item.label.toLowerCase().includes(q) || item.id.includes(q)) {
+          results.push({ ...item, id: 'nav-' + item.id, desc: 'Navigate to ' + item.label, action: () => this.navigate(item.id) });
+        }
+      }
+      if (q.includes('scan') || q.includes('scrape') || q.includes('run')) {
+        results.push({ id: 'scan', label: 'Run Intelligence Scan', desc: 'Trigger immediate scan of all sources', icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>', action: () => this.triggerScrape() });
+      }
+      return results;
+    },
+    async login() {
+      this.authError = '';
+      this.authMessage = '';
+      if (!this.loginUsername || !this.loginPassword) return;
+      if (this.loginPassword.length < 6) { this.authError = 'Password must be at least 6 characters'; return; }
+      this.loginLoading = true;
+      try {
+        const data = await this.api('/api/login', 'POST', { username: this.loginUsername, password: this.loginPassword });
+        this.userData = data.user;
+        this.authenticated = true;
+      } catch (e) {
+        this.authError = e.message || 'Invalid credentials';
+      }
+      this.loginLoading = false;
+    },
+    async logout() {
+      try { await this.api('/api/logout', 'POST'); } catch (e) {}
+      this.authenticated = false;
+      this.userData = null;
+      this.loginUsername = '';
+      this.loginPassword = '';
+      this.authError = '';
+      this.authMessage = '';
+      if (this.pollTimer) { clearInterval(this.pollTimer); this.pollTimer = null; }
+    },
+    async forgotPassword() {
+      this.forgotError = '';
+      this.forgotMessage = '';
+      this.forgotResetLink = '';
+      if (!this.forgotEmail) return;
+      this.forgotLoading = true;
+      try {
+        const data = await this.api('/api/forgot-password', 'POST', { email: this.forgotEmail });
+        if (data.reset_link) { this.forgotResetLink = data.reset_link; }
+        this.forgotMessage = data.message;
+        this.forgotSent = true;
+      } catch (e) {
+        this.forgotError = e.message || 'Failed to send reset link';
+      }
+      this.forgotLoading = false;
+    },
+    async submitResetPassword() {
+      this.resetError = '';
+      this.resetMessage = '';
+      if (!this.resetToken) { this.resetError = 'Missing reset token'; return; }
+      if (this.resetPassword.length < 6) { this.resetError = 'Password must be at least 6 characters'; return; }
+      if (this.resetPassword !== this.resetConfirm) { this.resetError = 'Passwords do not match'; return; }
+      this.resetLoading = true;
+      try {
+        const data = await this.api('/api/reset-password', 'POST', { token: this.resetToken, password: this.resetPassword });
+        this.resetMessage = data.message;
+        setTimeout(() => { this.showResetPassword = false; }, 2000);
+      } catch (e) {
+        this.resetError = e.message || 'Failed to reset password';
+      }
+      this.resetLoading = false;
+    },
+    async init() {
+      if (typeof initHtmlScripts === 'function') initHtmlScripts();
+      const params = new URLSearchParams(window.location.search);
+      const resetToken = params.get('reset_token');
+      if (resetToken) {
+        this.showResetPassword = true;
+        this.resetToken = resetToken;
+        window.history.replaceState({}, '', '/');
+      }
+      const pageFromUrl = this.getPageFromPath(location.pathname);
+      if (pageFromUrl && pageFromUrl !== 'dashboard') this.page = pageFromUrl;
+      if (!resetToken) history.replaceState({ page: this.page }, '', '/' + this.page);
+      window.addEventListener('popstate', (e) => {
+        const page = e.state?.page || this.getPageFromPath(location.pathname);
+        if (page && page !== this.page) this.navigate(page, { push: false });
+      });
+      try {
+        const data = await this.api('/api/me');
+        if (data?.user) {
+          this.userData = data.user;
+          this.authenticated = true;
+        }
+      } catch (e) {}
+      if (this.authenticated) {
+        await this.loadAll();
+        this.startPolling();
+      }
+    },
+    async loadAll() {
+      this.loading.page = true;
+      try {
+        const [stats, runs, recipients, settings] = await Promise.all([
+          this.api('/api/stats'),
+          this.api('/api/runs?limit=50'),
+          this.api('/api/recipients'),
+          this.api('/api/settings'),
+        ]);
+        this.stats = stats;
+        this.runs = runs;
+        this.lastRun = runs?.[0] || null;
+        this.recipients = recipients;
+        this.settings = settings;
+        this.allNotices = [];
+        this.sources = [...new Set((stats.source_counts || []).map(s => s.source))];
+      } catch (e) {
+        this.toast('Failed to load data', 'error');
+      }
+      this.loading.page = false;
+    },
+    async loadAllNotices() {
+      if (this.allNotices.length > 0) return;
+      this.loadingNotices = true;
+      try {
+        const promises = this.runs.slice(0, 5).map(r => this.api('/api/runs/' + r.batch_id).catch(() => null));
+        const results = await Promise.all(promises);
+        const seen = new Set();
+        for (const r of results) {
+          if (r?.notices) {
+            for (const n of r.notices) {
+              if (!seen.has(n.id)) {
+                seen.add(n.id);
+                this.allNotices.push(n);
+              }
+            }
+          }
+        }
+      } catch (e) {}
+      this.loadingNotices = false;
+    },
+    startPolling() {
+      this.pollTimer = setInterval(async () => {
+        try {
+          const runs = await this.api('/api/runs?limit=1');
+          if (runs?.[0]) {
+            const prevStatus = this.lastRun?.status;
+            this.lastRun = runs[0];
+            if (runs[0].status === 'running') {
+              this.scrapeRunning = true;
+            } else if (prevStatus === 'running' && runs[0].status !== 'running') {
+              this.scrapeRunning = false;
+              this.scrapeBatchId = null;
+              if (this.scrapePollTimer) { clearTimeout(this.scrapePollTimer); this.scrapePollTimer = null; }
+              if (runs[0].status === 'completed') {
+                this.toast('Scan complete: ' + runs[0].notices_new + ' new opportunities', 'success');
+              } else if (runs[0].status === 'failed') {
+                this.toast('Scan failed: ' + (runs[0].error || 'unknown error'), 'error');
+              }
+              await this.loadAll();
+            }
+          }
+        } catch (e) {}
+      }, 5000);
+    },
+    getPageFromPath(path) {
+      const clean = path.replace(/^\/+/, '').replace(/\/+$/, '');
+      if (!clean || clean === 'dashboard') return 'dashboard';
+      const valid = ['opportunities', 'intelligence', 'organizations', 'reports', 'monitoring', 'settings', 'documentation', 'users'];
+      return valid.includes(clean) ? clean : null;
+    },
+    async navigate(page, { push = true } = {}) {
+      this.page = page;
+      this.sidebarOpen = false;
+      this.selectedRunId = null;
+      this.loading.page = true;
+      this.cmdPaletteOpen = false;
+      if (push) history.pushState({ page }, '', '/' + page);
+      if (page === 'dashboard' || page === 'intelligence' || page === 'monitoring') await this.loadAll();
+      else if (page === 'opportunities') { await this.loadAll(); await this.loadAllNotices(); }
+      else if (page === 'reports') await this.loadRuns();
+      else if (page === 'settings') { await this.loadRecipients(); await this.loadSettings(); }
+      else if (page === 'users') await this.loadUsers();
+      else this.loading.page = false;
+    },
+    async loadRecipients() {
+      try { this.recipients = await this.api('/api/recipients'); } catch (e) {}
+      this.loading.page = false;
+    },
+    async loadRuns() {
+      try { this.runs = await this.api('/api/runs?limit=50'); } catch (e) {}
+      this.loading.page = false;
+    },
+    async loadSettings() {
+      try { this.settings = await this.api('/api/settings'); } catch (e) {}
+      this.loading.page = false;
+    },
+    sourceCount(name) {
+      const s = (this.stats.source_counts || []).find(x => x.source === name);
+      return s ? s.count : 0;
+    },
+    async triggerScrape() {
+      if (this.scrapeRunning) return;
+      this.scrapeRunning = true;
+      try {
+        const res = await this.api('/api/scrape', 'POST');
+        this.toast(res.message || 'Scan started', 'info');
+        if (res.batch_id) {
+          this.scrapeBatchId = res.batch_id;
+          this.pollScrapeProgress();
+        }
+      } catch (e) {
+        this.scrapeRunning = false;
+        this.toast('Failed to start scan', 'error');
+      }
+    },
+    async pollScrapeProgress() {
+      if (this.scrapePollTimer) clearTimeout(this.scrapePollTimer);
+      if (!this.scrapeBatchId) return;
+      try {
+        const prog = await this.api('/api/scrape/progress/' + this.scrapeBatchId);
+        this.scrapeProgress = prog;
+        if (prog.status === 'running') {
+          this.scrapePollTimer = setTimeout(() => this.pollScrapeProgress(), 2000);
+        } else {
+          this.scrapeProgress = prog;
+          this.scrapePollTimer = null;
+        }
+      } catch (e) {
+        this.scrapePollTimer = setTimeout(() => this.pollScrapeProgress(), 2000);
+      }
+    },
+    async triggerBatchAnalysis(batchId) {
+      if (this.batchLoading[batchId]) return;
+      this.batchLoading = { ...this.batchLoading, [batchId]: 'analyzing' };
+      try {
+        const res = await this.api('/api/analyze/' + batchId, 'POST');
+        this.toast(res.message || 'Analysis started', 'info');
+        if (res.analysis_id) {
+          this.pollAnalysisProgress(batchId, res.analysis_id);
+        }
+      } catch (e) {
+        this.batchLoading = { ...this.batchLoading, [batchId]: undefined };
+        this.toast('Failed to start analysis', 'error');
+      }
+    },
+    async triggerBatchForceAnalysis(batchId) {
+      if (this.batchLoading[batchId]) return;
+      this.batchLoading = { ...this.batchLoading, [batchId]: 'analyzing' };
+      try {
+        const res = await this.api('/api/analyze/' + batchId + '?force=true', 'POST');
+        this.toast(res.message || 'Re-analysis started', 'info');
+        if (res.analysis_id) {
+          this.pollAnalysisProgress(batchId, res.analysis_id);
+        }
+      } catch (e) {
+        this.batchLoading = { ...this.batchLoading, [batchId]: undefined };
+        this.toast('Failed to start re-analysis', 'error');
+      }
+    },
+    async pollAnalysisProgress(batchId, analysisId) {
+      const poll = async () => {
+        try {
+          const prog = await this.api('/api/analysis/progress/' + analysisId);
+          this.analysisProgress = { ...this.analysisProgress, [batchId]: prog };
+          if (prog.status === 'done' || prog.status === 'error') {
+            this.batchLoading = { ...this.batchLoading, [batchId]: undefined };
+            if (this.analysisPollTimers[batchId]) {
+              clearTimeout(this.analysisPollTimers[batchId]);
+              this.analysisPollTimers = { ...this.analysisPollTimers, [batchId]: undefined };
+            }
+            this.toast(prog.status === 'done' ? 'Analysis complete!' : 'Analysis failed', prog.status === 'done' ? 'success' : 'error');
+            await this.loadAll();
+          } else {
+            this.analysisPollTimers = { ...this.analysisPollTimers, [batchId]: setTimeout(poll, 2000) };
+          }
+        } catch (e) {
+          if (this.analysisPollTimers[batchId]) {
+            clearTimeout(this.analysisPollTimers[batchId]);
+            this.analysisPollTimers = { ...this.analysisPollTimers, [batchId]: undefined };
+          }
+        }
+      };
+      poll();
+    },
+    async sendRunEmail(batchId) {
+      if (this.batchLoading[batchId]) return;
+      this.batchLoading = { ...this.batchLoading, [batchId]: 'emailing' };
+      try {
+        const res = await this.api('/api/runs/' + batchId + '/email', 'POST');
+        this.toast('Emailed ' + res.sent + ' recipient(s)', 'success');
+        await this.loadAll();
+      } catch (e) {
+        this.toast('Email failed: ' + (e.message || 'unknown error'), 'error');
+      }
+      this.batchLoading = { ...this.batchLoading, [batchId]: undefined };
+    },
+    async deleteRun(batchId) {
+      try {
+        await this.api('/api/runs/' + batchId, 'DELETE');
+        this.runs = this.runs.filter(r => r.batch_id !== batchId);
+        this.toast('Batch deleted', 'success');
+      } catch (e) {
+        this.toast('Delete failed: ' + (e.message || 'unknown error'), 'error');
+      }
+    },
+    async addRecipient() {
+      const email = this.newRecipient.email.trim().toLowerCase();
+      if (!email) { this.recError = 'Email required'; return; }
+      if (!email.includes('@')) { this.recError = 'Invalid email'; return; }
+      this.recError = '';
+      try {
+        const res = await this.api('/api/recipients', 'POST', { email, name: this.newRecipient.name.trim() });
+        this.newRecipient = { email: '', name: '' };
+        this.recipients = await this.api('/api/recipients');
+        this.toast(res.status === 'added' ? 'Recipient added' : 'Recipient already exists', res.status === 'added' ? 'success' : 'info');
+      } catch (e) { this.recError = 'Failed to add recipient'; }
+    },
+    async deleteRecipient(id) {
+      try {
+        await this.api('/api/recipients/' + id, 'DELETE');
+        this.recipients = this.recipients.filter(r => r.id !== id);
+        this.toast('Recipient removed', 'success');
+      } catch (e) { this.toast('Failed to remove recipient', 'error'); }
+    },
+    async saveSettings(type) {
+      const data = {};
+      if (type === 'smtp') {
+        data.smtp_host = this.settings.smtp_host || '';
+        data.smtp_port = this.settings.smtp_port || '';
+        data.smtp_user = this.settings.smtp_user || '';
+        data.smtp_pass = this.settings.smtp_pass || '';
+        data.email_from = this.settings.email_from || '';
+      } else {
+        data.ai_provider = this.settings.ai_provider || '';
+        data.ai_api_key = this.settings.ai_api_key || '';
+        data.ai_model = this.settings.ai_model || '';
+        data.ai_base_url = this.settings.ai_base_url || '';
+      }
+      try {
+        await this.api('/api/settings', 'POST', data);
+        this.toast('Settings saved', 'success');
+      } catch (e) { this.toast('Failed to save settings', 'error'); }
+    },
+    async testEmail() {
+      try {
+        const res = await this.api('/api/settings/test-email', 'POST');
+        this.smtpMessage = res.message || (res.sent > 0 ? 'Sent!' : 'Failed');
+        this.smtpOk = res.sent > 0;
+      } catch (e) {
+        this.smtpMessage = 'Test failed: ' + (e.message || 'unknown error');
+        this.smtpOk = false;
+      }
+    },
+    async loadRunDetail(batchId) {
+      this.runDetail = { show: true, loading: true, data: null };
+      try {
+        const data = await this.api('/api/runs/' + batchId);
+        this.runDetail.data = data;
+      } catch (e) { this.toast('Failed to load run details', 'error'); }
+      this.runDetail.loading = false;
+    },
+    openOppDetail(notice) {
+      this.oppDetail = { show: true, data: notice };
+    },
+    handleKeydown(e) {
+      if (e.metaKey && e.key === 'k') { e.preventDefault(); this.cmdPaletteOpen = !this.cmdPaletteOpen; if (this.cmdPaletteOpen) this.$nextTick(() => this.$refs?.cmdInput?.focus()); }
+      if (this.cmdPaletteOpen) return;
+      if (e.key >= '1' && e.key <= '9') {
+        const idx = parseInt(e.key) - 1;
+        if (this.navItems[idx]) this.navigate(this.navItems[idx].id);
+      }
+      if (e.key === 's' && !e.metaKey && !e.ctrlKey) this.triggerScrape();
+    },
+    executeCommand() {
+      if (this.cmdResults[this.cmdIndex]) {
+        this.cmdResults[this.cmdIndex].action();
+        this.cmdPaletteOpen = false;
+        this.cmdQuery = '';
+      }
+    },
+    executeCmd(r) {
+      r.action();
+      this.cmdPaletteOpen = false;
+      this.cmdQuery = '';
+    },
+    toast(message, type = 'info') {
+      const id = ++this.toastId;
+      const icons = { success: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>', error: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>', warning: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>', info: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>' };
+      this.toasts.push({ id, message, type, icon: icons[type] || icons.info });
+    },
+    dismissToast(id) {
+      this.toasts = this.toasts.filter(t => t.id !== id);
+    },
+    confirmAction(title, message, action, variant = 'danger') {
+      this.confirm = { show: true, title, message, action, variant };
+    },
+    async api(url, method = 'GET', body = null) {
+      const opts = { method, headers: {}, credentials: 'same-origin' };
+      if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
+      const res = await fetch(url, opts);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: res.statusText }));
+        throw new Error(err.error || 'Request failed');
+      }
+      return res.json();
+    },
+    fmtDate(d) {
+      if (!d) return '—';
+      return new Date(d).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    },
+    timeAgo(d) {
+      if (!d) return '';
+      const s = Math.floor((Date.now() - new Date(d).getTime()) / 1000);
+      if (s < 60) return 'just now';
+      if (s < 3600) return Math.floor(s / 60) + 'm ago';
+      if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+      return Math.floor(s / 86400) + 'd ago';
+    },
+    duration(run) {
+      if (!run.started_at) return '\u2014';
+      const start = new Date(run.started_at);
+      const end = run.completed_at ? new Date(run.completed_at) : new Date();
+      const s = Math.round((end - start) / 1000);
+      if (s < 60) return s + 's';
+      if (s < 3600) return Math.floor(s / 60) + 'm ' + (s % 60) + 's';
+      return Math.floor(s / 3600) + 'h ' + Math.floor((s % 3600) / 60) + 'm';
+    },
+    async loadUsers() {
+      try {
+        this.users = await this.api('/api/users');
+      } catch (e) {}
+      this.loading.page = false;
+    },
+    async saveUser() {
+      this.userError = '';
+      try {
+        if (this.editingUser) {
+          const updated = await this.api('/api/users/' + this.editingUser.id, 'PUT', {
+            email: this.userForm.email,
+            name: this.userForm.name,
+          });
+          this.users = this.users.map(u => u.id === updated.id ? updated : u);
+          this.toast('User updated', 'success');
+        } else {
+          const created = await this.api('/api/users', 'POST', this.userForm);
+          this.users.unshift(created);
+          this.toast('User created', 'success');
+        }
+        this.userForm = { username: '', email: '', name: '', password: '' };
+        this.editingUser = null;
+      } catch (e) {
+        this.userError = e.message || 'Operation failed';
+      }
+    },
+    editUser(u) {
+      this.editingUser = u;
+      this.userForm = { username: u.username, email: u.email, name: u.name, password: '' };
+      this.userError = '';
+    },
+    async deleteUser(id) {
+      try {
+        await this.api('/api/users/' + id, 'DELETE');
+        this.users = this.users.filter(u => u.id !== id);
+        this.toast('User deleted', 'success');
+      } catch (e) {
+        this.toast('Delete failed: ' + (e.message || 'unknown error'), 'error');
+      }
+    },
+    showChangePass(u) {
+      this.passChangeUser = u;
+      this.userPassForm = { old_password: '', new_password: '' };
+      this.userError = '';
+    },
+    async changeUserPassword() {
+      this.userError = '';
+      try {
+        await this.api('/api/users/' + this.passChangeUser.id + '/password', 'PUT', this.userPassForm);
+        this.toast('Password updated', 'success');
+        this.passChangeUser = null;
+        this.userPassForm = { old_password: '', new_password: '' };
+      } catch (e) {
+        this.userError = e.message || 'Failed to change password';
+      }
+    },
+  };
+}
+</script>
+</body>
+</html>

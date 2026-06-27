@@ -1,0 +1,10 @@
+flask>=3.0
+flask-sqlalchemy>=3.1
+playwright>=1.40
+requests>=2.31
+python-dotenv>=1.0
+httpx>=0.25
+cloudscraper>=1.2
+beautifulsoup4>=4.12
+openpyxl
+gunicorn>=20.1
